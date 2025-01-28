@@ -1,0 +1,1 @@
+/* This header includes definition of all table types in the program, and declarations of related functions */
