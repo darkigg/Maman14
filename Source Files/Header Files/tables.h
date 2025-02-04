@@ -6,6 +6,7 @@
 #include "labels.h"
 #include "utilities.h"
 #include "assemblerErrorHandling.h"
+#include "macros.h"
 
 #define EXTEND_TABLE(table) (*table) = realloc(table, SIZE_OF_ARR(table) + sizeof(table[0]))
 
@@ -30,18 +31,7 @@ typedef struct assembler_error_table_line * assembler_error_table;
 
 /* C HAS NO SUPPORT FOR FUNCTION OVERLOADING - PLEASE FIX THE BELOW */
 
-/**
- * a function addition an additional line to a table.
- * @param table the table to add a line to.
- * @return whether or not the allocation was successful.
- */
-boolean extend_table(label_table *table);
-
-/**
- * a function addition an additional line to a table.
- * @param table the table to add a line to.
- * @return whether or not the allocation was successful.
- */
-boolean extend_table(assembler_error_table *table);
+/* Macros */
+Macro mcroTable[];
 
 #endif
