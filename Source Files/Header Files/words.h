@@ -1,5 +1,10 @@
-
 /* definition of the first word structure*/
+
+#ifndef WORDS
+#define WORDS
+
+#define ASSEMBLY_USED_WORDS { }
+
 struct as_first_word{
 
 	unsigned int opcode : 6;
@@ -15,3 +20,5 @@ struct as_first_word{
 };
 
 typedef struct as_first_word startword; /*startword is a struct used to represent the first word of an instruction*/
+
+#endif
