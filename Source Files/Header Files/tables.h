@@ -8,7 +8,7 @@
 #include "assemblerErrorHandling.h"
 #include "macros.h"
 
-#define EXTEND_TABLE(table) (*table) = realloc(table, SIZE_OF_ARR(table) + sizeof(table[0]))
+#define EXTEND_TABLE(table) ( (*table) = realloc(table, SIZE_OF_ARR(table) + sizeof(table[0])) )
 
 /**
  * Table type capable of containing all labels encountered, their addresses and all of their assigned attributes.
@@ -29,9 +29,15 @@ struct assembler_error_table_line{
 };
 typedef struct assembler_error_table_line * assembler_error_table;
 
-/* C HAS NO SUPPORT FOR FUNCTION OVERLOADING - PLEASE FIX THE BELOW */
+/**
+ * Table type capable of containing all macros and their contents
+ */
+struct macro_table_line{
+	char *name;
+	char *content;
+};
+typedef struct macro_table_line * macro_table;
 
-/* Macros */
-Macro mcroTable[];
+/* C HAS NO SUPPORT FOR FUNCTION OVERLOADING - PLEASE FIX THE BELOW */
 
 #endif

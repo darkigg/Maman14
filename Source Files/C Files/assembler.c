@@ -1,5 +1,6 @@
 /* section for all of the #include */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../Header Files/utilities.h"
@@ -19,9 +20,12 @@ int main(int argc, char *argv[]){
 		FILE *assembly_file;
 
 		/* table declarations */
-
+		macro_table macros;
 
 		/* table initiations */
+		macros = malloc(0);
+
+		/* open macros */
 
 		/*add .as to the file name string*/
 		file_name = strcat(argv[argc], ".as");
