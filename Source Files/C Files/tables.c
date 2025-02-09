@@ -2,12 +2,17 @@
 
 #include "../Header Files/tables.h"
 
-boolean extend_table(label_table *table){
-	(*table) = realloc(table, SIZE_OF_ARR(table) + 1);
-	return (*table) != NULL;
+/*initiate_tables_host cannot fail as it uses malloc(0) which practically cannot fail*/
+void initiate_tables_host(tables_host *host){
+	host->errors.table = malloc(0);
+	host->labels.table = malloc(0);
+	host->words.table = malloc(0);
+	host->macros.table = malloc(0);
 }
 
-boolean extend_table(assembler_error_table *table){
-	(*table) = realloc(table, SIZE_OF_ARR(table) + 1);
-	return (*table) != NULL;
+void free_tables_host(tables_host *host){
+	free(host->errors.table);
+	free(host->labels.table);
+	free(host->words.table);
+	free(host->macros.table);
 }

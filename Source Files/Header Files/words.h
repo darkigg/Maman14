@@ -3,7 +3,7 @@
 #ifndef WORDS
 #define WORDS
 
-#define ASSEMBLY_USED_WORDS { }
+#include "utilities.h"
 
 struct as_first_word{
 
@@ -18,7 +18,13 @@ struct as_first_word{
 	unsigned int E : 1;
 
 };
-
 typedef struct as_first_word startword; /*startword is a struct used to represent the first word of an instruction*/
+
+struct regular_word{
+	unsigned int A : 1;
+	unsigned int R : 1;
+	unsigned int E : 1;
+	int value : 21;
+};
 
 #endif

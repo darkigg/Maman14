@@ -3,56 +3,74 @@
 
 #include "../Header Files/labels.h"
 
-void addAttribute(labelAttributePool *pool, labelAttribute new_attribute){
+
+errorType scan_for_label(const char *segment, tables_host *host, int line_n){
+	char name[MAXLABEL];
+	errorType error_temp;
+
+	if( !(segment[SIZE_OF_ARR(segment) - 1] == ':') ) return NO_LABEL;
+
+	string_slicencpy(segment, name, 0, SIZE_OF_ARR(segment)-2);
+
+	error_temp = is_label_def_valid( name, *host );
+	if( error_temp != NONE ) error_temp = add_error(&(host->errors), error_temp, line_n);
+	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+
+	if(error_temp == NONE){
+		error_temp = add_label(&(host->labels), name, 0, 0, 0, 0);
+	}
 	
-	int amount_of_attributes;
-
-	amount_of_attributes = SIZE_OF_ARR((*pool).attributes);
-
-	(*pool).attributes = realloc((*pool).attributes, amount_of_attributes += 1);
-	(*pool).attributes[amount_of_attributes - 1] = new_attribute;
-
+	return error_temp;
 }
 
-boolean scan_for_label(char *line, label_table *table, assembler_error_table *errors){
+errorType is_label_def_valid( const char *label, const tables_host host ){
+	int i, char_temp;
 
-	char *name, *word; /* pointers to the discovered label name and to the word of the sentence from which it was taken*/
-	labelAttribute new_att; /* the attribute to add to the scanned label (if there was) in the label table */
-	assemblerErrorType error_temp; /* stores an error type as it is encountered, before adding it to a table*/
-	boolean was_label_scanned = False; /* was a label even scanned to begin with? */
+	macro_table macros; /*more convenient access to the macro table*/
+	label_table other_labels; /*more convenient access to the label table*/
 
-	while(strcmp((word = strtok(line, ' ')), "") == 0);
-
-	if(strcmp(word, ".extern") == 0){
-		name = strtok(NULL, ' ');
-		new_att = external;
-		was_label_scanned = True;
-	}
-	else if(word[SIZE_OF_ARR(word) - 1] == ':'){
-		strncat(name, word, SIZE_OF_ARR(word) - 1);
-		new_att = code;	
-		was_label_scanned = True;
+	macros = host.macros;
+	other_labels = host.labels;
+	
+	/* if the label name is not composed solely of letters and digits, the name is illegal */
+	for( char_temp = label[0], i=0; char_temp != '\0'; char_temp = label[++i] ){
+		if( !((char_temp >= 'a' && char_temp <= 'z') || /*is the current char a lower letter?*/
+			(char_temp >= 'A' && char_temp <= 'Z') || /*or perhaps is it capital letter?*/
+			(char_temp >= '0' && char_temp <= '9') /*or is it a digit?*/))
+			return ILLEGAL_LABEL_NAME; /* if non of the above conditions are met, the label's no good*/
 	}
 
-	/* only add arguments to the tables if a label declaration/definition was found */
-	if(was_label_scanned){
-		/* scan for error in the label name */
-		error_temp = is_label_def_valid(name);
-		if(extend_table(errors) && (error_temp != NONE))
-			errors[SIZE_OF_ARR(errors) - 1] = error_temp;
+	/* if the label name doesn't start with a letter, the name is illegal */
+	if(IS_LETTER(label[0])) return ILLEGAL_LABEL_NAME;
 
-		/* if the label is legal, extend the label table */
-		if( error_temp == NONE ){
-			extend_table(table);
+	/* if the label name overlaps with a language word, it is illegal */
+	if(is_language_word(label)) return ILLEGAL_LABEL_NAME;
 
-			/* if the label is external, set the address to 0 (non-0 addresses will not be set under this scope, for they do not depend on the label attributes assigned here)*/
-			if(new_att == external) table[SIZE_OF_ARR(table)-1]->address = 0;
+	/* if the label name overlaps with a macro name, it is illegal */
+	for(i = 0; i<SIZE_OF_ARR(macros); i++)
+		if(strcmp(label, macros.table[i].name) == 0) 
+			return ILLEGAL_LABEL_NAME;
 
-			/* add label to the table */
-			table[SIZE_OF_ARR(table)-1]->name = name;
-			addAttribute(&table[SIZE_OF_ARR(table)-1]->attributes, new_att);
-		}
+	/* if a label by the same name has already been declared, it is illegal */
+	for(i = 0; i<SIZE_OF_ARR(other_labels); i++)
+		if(strcmp(label, other_labels.table[i].name) == 0) 
+			return ILLEGAL_LABEL_NAME;
 
-		
-	}
+	return NONE;
+}
+
+errorType add_label(label_table *labels, char name[MAXLABEL], int address, boolean code, boolean external, boolean data){
+	struct label_table_line *line;
+	
+	EXTEND_TABLE(*labels);
+
+	line = &( (*labels).table[(*labels).length - 1] ); /*the latest collum in the table*/
+
+	(*line).name = name;
+	(*line).value = address;
+	(*line).code = code;
+	(*line).external = external;
+	(*line).data = data;
+
+	return NONE;
 }
