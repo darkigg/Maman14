@@ -1,18 +1,10 @@
-#include "string.h"
-
 #include "../Header Files/words.h"
 
-boolean is_language_word(char *str){
-	int i;
-	char **words = LANGUAGE_WORDS, *curr;
+errorType add_data_word(word_table *tab, int val, int DC){
+	EXTEND_TABLE( (*tab), struct word_table_line);
 
-	/* array going over all words used by the language, comparing each to str */
-	for(i = 0, curr = words[i]; i < SIZE_OF_ARR(words); curr = str[++i]){
-		
-		/* if str is the same as the current language word, return True */
-		if(strcmp(curr, str) == 0) return True;
-	}
-
-	/* if str wasn't recognized as any language word, return False */
-	return False;
+	(*tab).table[(*tab).length - 1].address = DC;
+	(*tab).table[(*tab).length - 1].value = val;
+	
+	return NONE;
 }

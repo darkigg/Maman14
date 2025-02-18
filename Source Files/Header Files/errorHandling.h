@@ -18,6 +18,7 @@ typedef enum{
 	MISSING_COMMA,
 	NOT_ENOUGH_ARGUMENTS,
 	TOO_MANY_ARGUMENTS,
+	ILLEGAL_ARGUMENT,
 	UNABLE_TO_ALLOCATE_MEMORY /* the most significant error; an encounter with it will lead to all other errors to be neglected as it is impossible to accurately point out all errors of the program if dynamic allocation is impossible. */
 
 } errorType;
@@ -27,7 +28,7 @@ typedef enum{
  * @param error_table pointer to the error table to which an error will be added.
  * @param new_error the type of the error to add.
  * @param line the line at which the new error was encountered.
- * @return an error encountered during the table expansion process, if any. The only error which could be practically returned is UNABLE_TO_ALLOCATE_MEMORY, if it is not encountered the return value will be none.
+ * @return an error encountered during the table expansion process; if none were, it will return the error that was added.
  */
 errorType add_error(error_table *error_table, errorType new_error, int line); 
 

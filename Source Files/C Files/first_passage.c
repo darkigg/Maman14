@@ -47,7 +47,9 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 		/* case a label is defined in this line */
 
 		/* scans for the practically first literal word in the line, as the actual first one is a label declaration as was found above */
-		for(segment = strtok(line, ' '); segment; segment = strtok(NULL, ' ')) if( strlen(segment) != 0) break;
+		for(segment = strtok(line, ' '); segment; segment = strtok(NULL, ' ')) 
+			if( strlen(segment) != 0) 
+				break;
 
 	}
 		
@@ -61,7 +63,7 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 				host->labels.table[(host->labels).length-1].value = *DC;
 			}
 			
-			error_temp = handle_instruction(DC, line, host, line_num);
+			error_temp = handle_instruction_passage1(DC, line, host, line_num);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
 			break;
@@ -82,7 +84,7 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 
 }
 
-errorType handle_instruction(int *DC, char *line, tables_host *host, const int linecnt){
+errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, const int linecnt){
 	char *segment;
 	errorType error_temp = NONE;
 

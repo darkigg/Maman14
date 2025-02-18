@@ -5,17 +5,22 @@
 
 
 errorType scan_for_label(const char *segment, tables_host *host, int line_n){
-	char name[MAXLABEL];
-	errorType error_temp;
+	
+	char name[MAXLABEL]; /*name of the label*/
+	errorType error_temp; /*temporary storage for potentially encountered errors*/
 
-	if( !(segment[SIZE_OF_ARR(segment) - 1] == ':') ) return NO_LABEL;
+	/* only if the segment ends with a colon can it be a label definition */
+	if( !(segment[SIZE_OF_ARR(segment) - 1] == ':') ) return NO_LABEL; 
 
+	/* slices the string to rid it of the prenthesis and copies it onto name (the original string remains unchanged) */
 	string_slicencpy(segment, name, 0, SIZE_OF_ARR(segment)-2);
 
+	/* ensures the validity  of the found label name, emitting an error if it is not */
 	error_temp = is_label_def_valid( name, *host );
 	if( error_temp != NONE ) error_temp = add_error(&(host->errors), error_temp, line_n);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
+	/* adds the label to the table of labels with default values if it is defined correctly */
 	if(error_temp == NONE){
 		error_temp = add_label(&(host->labels), name, 0, 0, 0, 0);
 	}
@@ -62,7 +67,8 @@ errorType is_label_def_valid( const char *label, const tables_host host ){
 errorType add_label(label_table *labels, char name[MAXLABEL], int address, boolean code, boolean external, boolean data){
 	struct label_table_line *line;
 	
-	EXTEND_TABLE(*labels);
+	/* extends the label table */
+	EXTEND_TABLE((*labels), struct label_table_line);
 
 	line = &( (*labels).table[(*labels).length - 1] ); /*the latest collum in the table*/
 

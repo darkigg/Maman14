@@ -65,7 +65,7 @@ errorType second_passage();
  * @param linecnt the number of the current line.
  * @return the most recent error encountered, if none were then NONE.
  */
-errorType handle_instruction(int *DC, char *line, tables_host *host, const int linecnt);
+errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, const int linecnt);
 
 /**
  * This function gets the start of the argument list for a certain line.

@@ -8,10 +8,9 @@
 #include "macros.h"
 #include "labels.h"
 
-#define EXTEND_TABLE(tab) /*expects 'tab' to be one of the table types, and to be called only when errorType is the return type.*/ \
-	void *result;\
-	result = realloc( (tab).table, (tab).length + sizeof((tab).table[0]) );\
-	if(result == NULL) return UNABLE_TO_ALLOCATE_MEMORY;\
+#define EXTEND_TABLE(tab, type) /*expects 'tab' to be one of the table types, and to be called only when errorType is the return type. type is the type of a single table line. */ \
+	(tab).table = (type *) realloc( (tab).table, (tab).length + sizeof((tab).table[0]) );\
+	if((tab).table == NULL) return UNABLE_TO_ALLOCATE_MEMORY;\
 	(tab).length++
 
 /**
@@ -63,6 +62,8 @@ typedef struct{
 struct word_table_line{
 	int value : 24;
 	int address : 21;
+	int data : 1;
+	int code : 1;
 };
 typedef struct{
 	struct word_table_line *table;
