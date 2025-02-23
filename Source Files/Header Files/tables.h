@@ -3,10 +3,13 @@
 #ifndef TABLES
 #define TABLES
 
+#include <stdlib.h>
+
 #include "errorHandling.h"
 #include "utilities.h"
 #include "macros.h"
 #include "labels.h"
+#include "words.h"
 
 #define EXTEND_TABLE(tab, type) /*expects 'tab' to be one of the table types, and to be called only when errorType is the return type. type is the type of a single table line. */ \
 	(tab).table = (type *) realloc( (tab).table, (tab).length + sizeof((tab).table[0]) );\
@@ -33,10 +36,12 @@ struct label_table_line{
 	char name[MAXLABEL];
 
 	/* all the identifiers a label can have */
-	boolean data;
-	boolean code;
-	boolean external;
-	boolean entry;
+	int data : 1;
+	int code : 1;
+	int external : 1;
+	int entry : 1;
+
+	/*note: if all identifiers are False (0), the label is ignored.*/
 	
 };
 typedef struct {
@@ -60,7 +65,7 @@ typedef struct{
  * Table type capable of containting all word bit values and their addresses.
  */
 struct word_table_line{
-	int value : 24;
+	assembly_word word;
 	int address : 21;
 	int data : 1;
 	int code : 1;

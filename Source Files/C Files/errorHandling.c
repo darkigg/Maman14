@@ -1,5 +1,7 @@
 #include "../Header Files/errorHandling.h"
 
+/*this file includes functions for handling errors*/
+
 errorType add_error(error_table *error_table, errorType new_error, int line){
 	EXTEND_TABLE((*error_table), struct error_table_line);
 

@@ -1,4 +1,5 @@
 #include "../Header Files/read_am.h"
+/*this file includes definitions for central and fundumental operations performed during the interpertation process of the .am file*/
 
 errorType translate_file(FILE *file, tables_host *host){
 	/* DECLARATIONS */

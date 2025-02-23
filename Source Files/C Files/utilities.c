@@ -1,4 +1,5 @@
 #include "../Header Files/utilities.h"
+/*this file includes definitions for functions which are used throughout the assembler and are not useful only for specific sections, nor do they have much in relation with other functions.*/
 
 boolean string_slicencpy(const char* source, char* destination, int start, int end){
 

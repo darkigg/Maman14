@@ -10,18 +10,31 @@
 
 /**
  * A function responsible for handling the .data instruction.
- * @param host the host of tables.
+ * @param host pointer to the host of tables.
  * @param line the line to read.
+ * @param DC pointer to the data counter.
+ * @param linecnt the number of the line currently read.
  * @return the most recent error encountered.
  */
-errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt);
+errorType data_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt);
 
 /**
  * A function responsible for handling the .string instruction.
- * @param host the host of tables.
+ * @param host pointer to the host of tables.
  * @param line the line to read.
+ * @param DC pointer to the data counter.
+ * @param linecnt the number of the line currently read.
  * @return the most recent error encountered.
  */
-errorType string_inst(tables_host *host, char *line, int *DC, const int linecnt);
+errorType string_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt);
+
+/**
+ * A function responsible for handling the .extern instruction.
+ * @param host pointer to the host of tables.
+ * @param line the line to read.
+ * @param linecnt the number of the line currently read.
+ * @return the most recent error encountered.
+ */
+errorType extern_inst(tables_host *host, char *line, const int linecnt);
 
 #endif
