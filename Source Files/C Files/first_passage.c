@@ -56,7 +56,7 @@ errorType first_passage_line(char *line, tables_host *host, word_table *data_wor
 	error_temp = scan_for_label(segment, host, line_num, label_name);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
-	if(!(error_temp == NO_LABEL)) {
+	if(error_temp != NO_LABEL) {
 		/* case a label is defined in this line */
 		error_temp == NONE; /*in order to avoid possible confusion*/
 		is_label_definition = True;
@@ -87,7 +87,7 @@ errorType first_passage_line(char *line, tables_host *host, word_table *data_wor
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
 			/* case instruction was found to be the case */
-			if(is_label_definition) {
+			if(is_label_definition && error_temp != USELESS_LABEL) {
 				add_label(&(host->labels), label_name, og_counter, False, False, error_temp != USELESS_LABEL); /*add the label to the label table, but only enable data tag if the label is not to be ignored.*/
 			}
 			break;

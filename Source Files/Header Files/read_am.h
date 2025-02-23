@@ -13,7 +13,7 @@ The functions here potentially could, though, call functions from other headers 
 #include "labels.h"
 #include "utilities.h"
 #include "instructions.h"
-#include "functionsData.h"
+#include "compileFunc.h"
 
 /* stores the type of instruction, as each different instruction requires widely different implementation */
 

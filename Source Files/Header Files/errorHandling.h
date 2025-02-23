@@ -19,7 +19,7 @@ typedef enum{
 	ILLEGAL_COMMA,
 	MISSING_COMMA,
 	NOT_ENOUGH_ARGUMENTS,
-	TOO_MANY_ARGUMENTS,
+	EXTRANEOUS_TEXT,
 	ILLEGAL_ARGUMENT,
 
 	/* the most significant error; an encounter with it will lead to all other errors to be neglected as it is impossible to accurately point out all errors of the program if dynamic allocation is impossible. 

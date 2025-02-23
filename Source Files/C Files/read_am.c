@@ -5,12 +5,14 @@ errorType translate_file(FILE *file, tables_host *host){
 	/* DECLARATIONS */
 	char line[MAXLINE]; /*stores the current line*/
 	int line_counter = 0; /*counter of lines read so far*/
+	errorType error_temp; /*a variable naming convention throughout the .am file analysis, for variables containing the most recent error*/
 
 	/*counters*/
 	int IC = 0, DC = 0;
 
 	/* STAGE 1 */
-	first_passage(file, host);
+	error_temp = first_passage(file, host);
+	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp; /* the most urgent error, with it there is both a practical and a theoretical impossibility of the compilitation process proceeding */
 
 	/* STAGE 2 */
 

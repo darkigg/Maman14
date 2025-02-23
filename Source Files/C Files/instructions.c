@@ -4,7 +4,6 @@
 errorType data_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt){
 	char *segment; /*the currently iterated over token*/
 	errorType error_temp;
-	boolean is_prev_data = False, is_prev_comma = False;	
 	
 	/* rids line of potential label declarations and the instruction call itself */
 	line = get_arg_list(line);
@@ -74,7 +73,7 @@ errorType string_inst(tables_host *host, word_table *data_words, char *line, int
 	/* a loop iterating what is left of the line after the string has ended, to ensure no additional arguments were listed as that is illegal */
 	for(char_temp = line[++i]; char_temp != '\0'; char_temp = line[++i])
 		if( !(IS_WHITESPACE(char_temp)) ) { /*if a character that is not white is encountered, an error must be reported*/
-			error_temp = add_error(&(host->errors), TOO_MANY_ARGUMENTS, linecnt);
+			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
 			return error_temp;
 		}
 
@@ -102,7 +101,7 @@ errorType extern_inst(tables_host *host, char *line, const int linecnt){
 	/* checks for additional arguments post label name, and reports an error accordingly */
 	for(; *char_ptr_temp != '\0'; char_ptr_temp++)
 		if( !(IS_WHITESPACE((*char_ptr_temp))) ){
-			error_temp = add_error(&(host->errors), TOO_MANY_ARGUMENTS, linecnt);
+			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
 			return error_temp;
 		}
 	
