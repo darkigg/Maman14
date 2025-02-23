@@ -55,4 +55,11 @@ boolean is_language_word(char *str);
  */
 boolean is_string_numeric(const char *str);
 
+/**
+ * Finds out whether or not a given string contains any character other than white characters.
+ * @param str the string to check.
+ * @return whether or not a non-white character was found in str.
+ */
+boolean is_string_empty(char *str);
+
 #endif

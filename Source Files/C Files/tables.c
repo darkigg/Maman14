@@ -1,6 +1,5 @@
-#include <stdlib.h>
-
 #include "../Header Files/tables.h"
+/*this file includes definitions of functions for general table handling and tables host handling*/
 
 /*initiate_tables_host cannot fail as it uses malloc(0) which practically cannot fail*/
 void initiate_tables_host(tables_host *host){

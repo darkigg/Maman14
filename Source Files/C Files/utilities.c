@@ -1,4 +1,5 @@
 #include "../Header Files/utilities.h"
+/*this file includes definitions for functions which are used throughout the assembler and are not useful only for specific sections, nor do they have much in relation with other functions.*/
 
 boolean string_slicencpy(const char* source, char* destination, int start, int end){
 
@@ -55,4 +56,15 @@ boolean is_language_word(char *str){
 
 	/* if str wasn't recognized as any language word, return False */
 	return False;
+}
+
+boolean is_string_empty(char *str){
+
+	/* a loop iterating over the entirety of str, checking for each character whether it is white or not.*/
+	for(;str != '\0'; str++){
+		if( !IS_WHITESPACE(*str) )
+			return False; /*the string is not void of meaningful content*/
+	}
+
+	return True; /* the string is indeed void of meaningful content */
 }

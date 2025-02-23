@@ -1,9 +1,9 @@
 #include "../Header Files/instructions.h"
+/*this file includes definitions for functions handling and executing specific instructions encountered in the code*/
 
-errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
+errorType data_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt){
 	char *segment; /*the currently iterated over token*/
 	errorType error_temp;
-	boolean is_prev_data = False, is_prev_comma = False;	
 	
 	/* rids line of potential label declarations and the instruction call itself */
 	line = get_arg_list(line);
@@ -34,7 +34,7 @@ errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 		}
 
 		value = atoi(segment); /*convert the argument to an integer*/ 
-		error_temp = add_data_word( &(host->words), value, (*DC)++ ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
+		error_temp = add_word( data_words, value, (*DC)++ ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 		
 	}
@@ -42,7 +42,7 @@ errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 	return error_temp;
 }
 
-errorType string_inst(tables_host *host, char *line, int *DC, const int linecnt){
+errorType string_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt){
 	errorType error_temp;
 	int char_temp, /*stores the currently iterated over character*/
 		i; 
@@ -50,24 +50,71 @@ errorType string_inst(tables_host *host, char *line, int *DC, const int linecnt)
 	/* rids line of potential label declarations and the instruction call itself, bringing it to the beginning of the string */
 	line = get_arg_list(line); 
 
+	/*get_arg_list returns NULL if an argument list was not found; .string must receive 1 argument and so an error must be reported*/
+	if(line == NULL){ 
+		error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
+		return error_temp;
+	}
+
 	/*if the first character of the argument list is not a ", meaning it is not the beginning of a string, that argument is invalid and an error is to be reported*/
-	if(line[0] != '"')  error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
-	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+	if(line[0] != '"') { 
+		error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
+		return error_temp;
+	}
 
 	/* a loop iterating over all characters in the string, but only if no errors were encountered so far */
 	if(error_temp == NONE) for(i = 1, char_temp = line[i]; char_temp != '"'; char_temp = line[++i]){
 		/*i starts at 1 because the first character in line is a ", yet it is not a part of the string*/
 
-		error_temp = add_data_word( &(host->words), char_temp, (*DC)++ ); /*adds the character to the table of words; increments the value of DC as a data word has been encountered. */
+		error_temp = add_word( data_words, char_temp, (*DC)++ ); /*adds the character to the table of words; increments the value of DC as a data word has been encountered. */
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 	}
 
 	/* a loop iterating what is left of the line after the string has ended, to ensure no additional arguments were listed as that is illegal */
 	for(char_temp = line[++i]; char_temp != '\0'; char_temp = line[++i])
 		if( !(IS_WHITESPACE(char_temp)) ) { /*if a character that is not white is encountered, an error must be reported*/
-			error_temp = add_error(&(host->errors), TOO_MANY_ARGUMENTS, linecnt);
-			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
+			return error_temp;
 		}
+
+	return error_temp;
+}
+
+errorType extern_inst(tables_host *host, char *line, const int linecnt){
+	errorType error_temp;
+	char label[MAXLABEL], /*stores the name of the label referenced in the instruction*/
+		*char_ptr_temp; 
+
+	/* rids line of potential label declarations and the instruction call itself, bringing it to the beginning of the label name */
+	line = get_arg_list(line); 
+
+	/*get_arg_list returns NULL if an argument list was not found; .extern must receive 1 argument and so an error must be reported*/
+	if(line == NULL) { 
+		error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
+		return error_temp;
+	}
+
+	/* a loop copying the suspected label name into the label string */
+	for(char_ptr_temp = line; *char_ptr_temp != ' ' && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
+		label[char_ptr_temp-line] = *char_ptr_temp; /*char_ptr_temp-line is the index of the char pointed to by char_ptr_temp within the line string*/
+
+	/* checks for additional arguments post label name, and reports an error accordingly */
+	for(; *char_ptr_temp != '\0'; char_ptr_temp++)
+		if( !(IS_WHITESPACE((*char_ptr_temp))) ){
+			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
+			return error_temp;
+		}
+	
+	/* ensures the validity of the supposed label name */
+	error_temp = is_label_def_valid(label, *host);
+	if(error_temp != NONE){
+		error_temp = add_error(&(host->errors), ILLEGAL_LABEL_NAME, linecnt);
+		return error_temp;
+	}
+
+	/* in the case none of the above errors were encountered, the function adds label to the labels table as an external label */
+	error_temp = add_label(&(host->labels), label, 0, 0, 1, 0);
+	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
 	return error_temp;
 }

@@ -7,6 +7,7 @@
 #include "../Header Files/utilities.h"
 #include "../Header Files/read_am.h"
 
+/*this file includes the main function.*/
 
 /*the program's main function*/
 int main(int argc, char *argv[]){

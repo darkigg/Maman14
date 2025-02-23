@@ -11,25 +11,31 @@
 
 /**
  * This function, given the first token of a line seperated by whitespaces, seeks a label within that line.
- * If a label is found, it will be added to the table.
  * @param segment the token from which to attempt extracting the label.
  * @param name the string to write the label name to.
- * @param host the tables host.
+ * @param host pointer to the tables host.
+ * @param name pointer to a string to which the spotted (if was) label's name shall be written.
  * @return the most recent error encountered by the function.
  */
-errorType scan_for_label(const char *segment, tables_host *host, int line_n);
+errorType scan_for_label(const char *segment, tables_host *host, int line_n, char *name);
 
 /**
  * Verifies validity of a label name, emitting an error if it is not.
  * @param label the label whose validity is to be verified.
  * @param host the table host.
- * @return NONE if the label is valid, ILLEGAL_LABEL_NAME otherwise.
+ * @return NONE if the label is valid, a corresponding error type otherwise.
  */
 errorType is_label_def_valid( const char *label, const tables_host host );
 
 /**
  * adds a label to a label table, with a name, address and identifiers.
- * FINISH APIIIIIIIIIIIII
+ * @param labels a pointer to the table of labels.
+ * @param name the name of the label to add.
+ * @param address the address of the label, e.g. the value it shall possess.
+ * @param code whether or not to apply the code identifier to the label added.
+ * @param external whether or not to apply the external identifier to the label added.
+ * @param data whether or not to apply the data identifier to the label added.
+ * @return the error most recently encountered by the function. Either none or UNABLE_TO_ALLOCATE_MEMORY.
  */
 errorType add_label(label_table *labels, char name[MAXLABEL], int address, boolean code, boolean external, boolean data);
 

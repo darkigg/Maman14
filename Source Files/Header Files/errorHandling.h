@@ -10,17 +10,25 @@ typedef enum{
 
 	NONE,
 	ILLEGAL_LABEL_NAME,
-	NO_LABEL, /*not a real error*/
+	MULTIPLE_DEF_NOT_ALLOWED, /*error for attempting to define multiple labels with the same name*/
+	ILLEGAL_LABEL_DEFINITION,
+	
 	ILLEGAL_FUNCTION_NAME,
 	ILLEGAL_INSTRUCTION_NAME,
 	MULTIPLE_CONSECUTIVE_COMMAS,
 	ILLEGAL_COMMA,
 	MISSING_COMMA,
 	NOT_ENOUGH_ARGUMENTS,
-	TOO_MANY_ARGUMENTS,
+	EXTRANEOUS_TEXT,
 	ILLEGAL_ARGUMENT,
-	UNABLE_TO_ALLOCATE_MEMORY /* the most significant error; an encounter with it will lead to all other errors to be neglected as it is impossible to accurately point out all errors of the program if dynamic allocation is impossible. */
 
+	/* the most significant error; an encounter with it will lead to all other errors to be neglected as it is impossible to accurately point out all errors of the program if dynamic allocation is impossible. 
+	It is also used when the imaginary machine runs out of addresses, as it is an equivalent situation */
+	UNABLE_TO_ALLOCATE_MEMORY, 
+	
+	/*demo errors, included in this type as they create unusual circumstances and require special handling*/
+	NO_LABEL, 
+	USELESS_LABEL
 } errorType;
 
 /**
