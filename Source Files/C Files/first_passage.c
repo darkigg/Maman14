@@ -9,18 +9,11 @@ errorType first_passage(FILE *file, tables_host *host){
 	/* the most recently encountered error */
 	errorType error_temp = NONE;
 
-	/* table of data words */
-	word_table data_words;
-
 	/* counters */
 	int DC = 0, IC = INITIAL_ADDRESS, line_counter = 0;
 
-	/*set up the table*/
-	data_words.length = 0;
-	data_words.table = (struct word_table_line *) malloc(0);
-
 	while( fgets(line, MAX_LINE, file) != NULL ){
-		error_temp = first_passage_line(line, host, &data_words, &IC, &DC, ++line_counter);
+		error_temp = first_passage_line(line, host, &IC, &DC, ++line_counter);
 
 		/* An error of not enough memory requires as hurried a return to main as possible; it will lead the assembler to break if it continues. */
 		if(error_temp = UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
@@ -32,7 +25,7 @@ errorType first_passage(FILE *file, tables_host *host){
 
 }
 
-errorType first_passage_line(char *line, tables_host *host, word_table *data_words, int *IC, int *DC, const int line_num){
+errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, const int line_num){
 	char *segment, /*the token of the line currently scanned*/
 		label_name[MAXLABEL]; /*the name of a label potentially declared in this line*/
 
@@ -83,7 +76,7 @@ errorType first_passage_line(char *line, tables_host *host, word_table *data_wor
 			og_counter = *DC;	
 
 			/****** POTENTIAL PROBLEM HERE - YOU ARE YET UNCERTAIN REGARDING THE PRECISE METHOD OF HANDLING LABEL DEFINITIONS IN LINES WITH THE INSTRUCTION .extern AND .entry ****************************/
-			error_temp = handle_instruction_passage1(DC, line, host, &data_words, line_num);
+			error_temp = handle_instruction_passage1(DC, line, host, line_num);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
 			/* case instruction was found to be the case */
@@ -112,7 +105,7 @@ errorType first_passage_line(char *line, tables_host *host, word_table *data_wor
 
 }
 
-errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, word_table *data_words,  const int linecnt){
+errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, const int linecnt){
 	char *segment;
 	errorType error_temp = NONE;
 
@@ -122,25 +115,27 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, wo
 
 	if(strcmp(segment, ".data") == 0){
 		/* case for .data instruction*/
-		error_temp = data_inst(host, data_words, line, DC, linecnt);
+		error_temp = data_inst(host, line, DC, linecnt);
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 	}
 	else if(strcmp(segment, ".string") == 0){
 		/* case for .string instruction*/
-		error_temp = string_inst(host, data_words, line, DC, linecnt);
+		error_temp = string_inst(host, line, DC, linecnt);
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 	}
 	else if(strcmp(segment, ".extern") == 0){
 		/* case for .extern instruction*/
 		error_temp = extern_inst(host, line, linecnt);
-		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+		if(error_temp != NONE) return error_temp;
 
 		error_temp = USELESS_LABEL;
 	}
 	else if(strcmp(segment, ".entry") == 0){
 		/* case for .entry instruction*/
+		error_temp = firstphase_entry_inst(host, line, linecnt);
+		if(error_temp != NONE) return error_temp;
 		
-		/* nothing shall be executed as .entry is handled by the 2nd compilation phase, yet a label definition in the current line would be meaningless and the function must notify it is to be partially ignored. */
+		/* .entry is handled by the 2nd compilation phase, and so the function handling it does not conclude the handling. Yet, a label definition in the current line would be meaningless and the function must notify it is to be partially ignored. */
 		error_temp = USELESS_LABEL;
 	}
 	else{

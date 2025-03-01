@@ -9,10 +9,12 @@
 typedef enum{
 
 	NONE,
+	ILLEGAL_MACRO_DEFINITION,
+	MACRO_DOESNT_EXIST,
+	LINE_TOO_LONG,
 	ILLEGAL_LABEL_NAME,
 	MULTIPLE_DEF_NOT_ALLOWED, /*error for attempting to define multiple labels with the same name*/
 	ILLEGAL_LABEL_DEFINITION,
-	
 	ILLEGAL_FUNCTION_NAME,
 	ILLEGAL_INSTRUCTION_NAME,
 	MULTIPLE_CONSECUTIVE_COMMAS,
@@ -22,9 +24,7 @@ typedef enum{
 	EXTRANEOUS_TEXT,
 	ILLEGAL_ARGUMENT,
 
-	/* the most significant error; an encounter with it will lead to all other errors to be neglected as it is impossible to accurately point out all errors of the program if dynamic allocation is impossible. 
-	It is also used when the imaginary machine runs out of addresses, as it is an equivalent situation */
-	UNABLE_TO_ALLOCATE_MEMORY, 
+	UNABLE_TO_ALLOCATE_MEMORY, /* used when the imaginary computer runs out of addresses, will lead to the termination of process on the cu*/
 	
 	/*demo errors, included in this type as they create unusual circumstances and require special handling*/
 	NO_LABEL, 

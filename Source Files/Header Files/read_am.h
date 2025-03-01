@@ -50,7 +50,7 @@ errorType first_passage(FILE *file, tables_host *host);
  * @param DC the data counter.
  * @return latest error encountered before function termination.
  */
-errorType first_passage_line(char *line, tables_host *host, word_table *data_words, int *IC, int *DC, const int line_num);
+errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, const int line_num);
 
 /**
  * Function responsible for the 2nd stage of the assembler.
@@ -67,7 +67,7 @@ errorType second_passage();
  * @param linecnt the number of the current line.
  * @return the most recent error encountered, if none were then NONE.
  */
-errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, word_table *data_words,  const int linecnt);
+errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, const int linecnt);
 
 /**
  * This function gets the start of the argument list for a certain line.

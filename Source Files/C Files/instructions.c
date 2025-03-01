@@ -1,9 +1,9 @@
 #include "../Header Files/instructions.h"
 /*this file includes definitions for functions handling and executing specific instructions encountered in the code*/
 
-errorType data_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt){
+errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 	char *segment; /*the currently iterated over token*/
-	errorType error_temp;
+	errorType error_temp = NONE;
 	
 	/* rids line of potential label declarations and the instruction call itself */
 	line = get_arg_list(line);
@@ -26,7 +26,7 @@ errorType data_inst(tables_host *host, word_table *data_words, char *line, int *
 			break; /*there is an error in the line, continuing to read it will be meaningless*/
 		}
 
-		else if(is_string_numeric(segment)){/*if the argument is not numeric, space cannot be allocated to it*/
+		else if(!is_string_numeric(segment)){/*if the argument is not numeric, space cannot be allocated to it*/
 			error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
@@ -34,7 +34,7 @@ errorType data_inst(tables_host *host, word_table *data_words, char *line, int *
 		}
 
 		value = atoi(segment); /*convert the argument to an integer*/ 
-		error_temp = add_word( data_words, value, (*DC)++ ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
+		error_temp = add_word( &(host->data_words), value, (*DC)++, False ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 		
 	}
@@ -42,8 +42,8 @@ errorType data_inst(tables_host *host, word_table *data_words, char *line, int *
 	return error_temp;
 }
 
-errorType string_inst(tables_host *host, word_table *data_words, char *line, int *DC, const int linecnt){
-	errorType error_temp;
+errorType string_inst(tables_host *host, char *line, int *DC, const int linecnt){
+	errorType error_temp = NONE;
 	int char_temp, /*stores the currently iterated over character*/
 		i; 
 
@@ -66,7 +66,7 @@ errorType string_inst(tables_host *host, word_table *data_words, char *line, int
 	if(error_temp == NONE) for(i = 1, char_temp = line[i]; char_temp != '"'; char_temp = line[++i]){
 		/*i starts at 1 because the first character in line is a ", yet it is not a part of the string*/
 
-		error_temp = add_word( data_words, char_temp, (*DC)++ ); /*adds the character to the table of words; increments the value of DC as a data word has been encountered. */
+		error_temp = add_word( &(host->data_words), char_temp, (*DC)++, False ); /*adds the character to the table of words; increments the value of DC as a data word has been encountered. */
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 	}
 
@@ -81,7 +81,7 @@ errorType string_inst(tables_host *host, word_table *data_words, char *line, int
 }
 
 errorType extern_inst(tables_host *host, char *line, const int linecnt){
-	errorType error_temp;
+	errorType error_temp = NONE;
 	char label[MAXLABEL], /*stores the name of the label referenced in the instruction*/
 		*char_ptr_temp; 
 
@@ -98,7 +98,7 @@ errorType extern_inst(tables_host *host, char *line, const int linecnt){
 	for(char_ptr_temp = line; *char_ptr_temp != ' ' && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
 		label[char_ptr_temp-line] = *char_ptr_temp; /*char_ptr_temp-line is the index of the char pointed to by char_ptr_temp within the line string*/
 
-	/* checks for additional arguments post label name, and reports an error accordingly */
+	/* checks for additional arguments post label name, and potentially reports an error accordingly */
 	for(; *char_ptr_temp != '\0'; char_ptr_temp++)
 		if( !(IS_WHITESPACE((*char_ptr_temp))) ){
 			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
@@ -116,5 +116,37 @@ errorType extern_inst(tables_host *host, char *line, const int linecnt){
 	error_temp = add_label(&(host->labels), label, 0, 0, 1, 0);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
+	return error_temp;
+}
+
+errorType firstphase_entry_inst(tables_host *host, char *line, const int linecnt){
+	errorType error_temp = NONE;
+	char label[MAXLABEL], /*stores the name of the label referenced in the instruction*/
+		*char_ptr_temp; 
+
+	/* rids line of potential label declarations and the instruction call itself, bringing it to the beginning of the label name */
+	line = get_arg_list(line);
+
+	/*get_arg_list returns NULL if an argument list was not found; .entry must receive 1 argument and so an error must be reported*/
+	if(line == NULL) { 
+		error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
+		return error_temp;
+	}
+
+	/* a loop copying the suspected label name into the label string */
+	for(char_ptr_temp = line; *char_ptr_temp != ' ' && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
+		label[char_ptr_temp-line] = *char_ptr_temp; /*char_ptr_temp-line is the index of the char pointed to by char_ptr_temp within the line string*/
+
+	/* checks for additional arguments post label name, and potentially reports an error accordingly */
+	for(; *char_ptr_temp != '\0'; char_ptr_temp++)
+		if( !(IS_WHITESPACE((*char_ptr_temp))) ){
+			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
+			return error_temp;
+		}
+
+	/* adds the argument to the label arguments table, so that it will be inferred during the 2nd assembler phase */
+	error_temp = add_label_argument( &(host->lab_args), linecnt, -1, label);
+	
+	/* return either NONE (the initial value) or the most recently encountered error */
 	return error_temp;
 }
