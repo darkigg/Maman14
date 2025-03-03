@@ -36,6 +36,15 @@ typedef struct as_word{
 	int value : 24;
 } assembly_word;
 
+#define ADD_WORD_ERROR_HANDLING(tHost, eTemp, lCount) /*tHost is a pointer to the tables host, eTemp is the error temporary variable, and lCount is the number of the line.*/\
+	if(eTemp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(tHost); /*if memory allocation cannot be enacted, the program shall be terminated*/\
+	else if(eTemp != NONE){\
+		/*if add_word returned any other error (and it could have), that error shall be reported in the usual procedure.*/\
+		eTemp = add_error( &(tHost->errors), NO_AVAILABLE_ADDRESS, lCount);\
+		if(eTemp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(tHost);\
+		else return eTemp;\
+	}
+
 /**
  * Given a startword, the function initiallizes all of its values to 0.
  * @param word a pointer to the startword to initiallize.

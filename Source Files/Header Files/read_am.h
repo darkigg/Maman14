@@ -55,9 +55,10 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 /**
  * Function responsible for the 2nd stage of the assembler.
  * The second stage is responsible for translating every line that references labels to machine code.
- * 
+ * @param host a pointer to the host of tables.
+ * @return the most recent error encountered during the function's execution. 
  */
-errorType second_passage();
+errorType second_passage(tables_host *host);
 
 /**
  * Handles instructions, reports errors, increments the data counter as much as necessary and adding all words to the table of addresses.

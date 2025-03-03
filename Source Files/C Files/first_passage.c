@@ -14,13 +14,13 @@ errorType first_passage(FILE *file, tables_host *host){
 
 	while( fgets(line, MAX_LINE, file) != NULL ){
 		error_temp = first_passage_line(line, host, &IC, &DC, ++line_counter);
-
-		/* An error of not enough memory requires as hurried a return to main as possible; it will lead the assembler to break if it continues. */
-		if(error_temp = UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* an error of not enough memory requires immidiate termination of the program */
+		else if(error_temp == NO_AVAILABLE_ADDRESS) break; /*if there are no more available addresses for words in the imaginary computer, there is no need to go over the rest of the program */
 	}
 
 	/* integrate the table of data words into the main table of words */
-	
+	error_temp = append_words_table(&(host->words), host->data_words);
+
 	return error_temp;
 
 }
@@ -62,7 +62,8 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 		/* if segment is NULL, no arguments were found following the label declaration; that is illegal. */
 		if(segment == NULL){
 			error_temp = add_error( &(host->errors), ILLEGAL_LABEL_DEFINITION, line_num);
-			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return UNABLE_TO_ALLOCATE_MEMORY;
+			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+			else return error_temp;
 		}
 
 	}
@@ -77,11 +78,13 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 
 			/****** POTENTIAL PROBLEM HERE - YOU ARE YET UNCERTAIN REGARDING THE PRECISE METHOD OF HANDLING LABEL DEFINITIONS IN LINES WITH THE INSTRUCTION .extern AND .entry ****************************/
 			error_temp = handle_instruction_passage1(DC, line, host, line_num);
-			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+			if(error_temp == NO_AVAILABLE_ADDRESS) return error_temp; /*if the error of no available address is encountered at this line, other errors are of lower importance in comparasion and therefore the function must return immediately with that error.*/
 
 			/* case instruction was found to be the case */
 			if(is_label_definition && error_temp != USELESS_LABEL) {
-				add_label(&(host->labels), label_name, og_counter, False, False, error_temp != USELESS_LABEL); /*add the label to the label table, but only enable data tag if the label is not to be ignored.*/
+				error_temp = add_label(&(host->labels), label_name, og_counter, False, False, error_temp != USELESS_LABEL); /*add the label to the label table, but only enable data tag if the label is not to be ignored.*/
+				if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			}
 			break;
 
@@ -89,11 +92,13 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 			og_counter = *IC;
 
 			error_temp = read_code_line(host, line, IC, line_num, False);
-			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+			if(error_temp == NO_AVAILABLE_ADDRESS) return error_temp; /*if the error of no available address is encountered at this line, other errors are of lower importance in comparasion and therefore the function must return immediately with that error.*/
 
 			/* case an operation execution was found to be the case. */
 			if(is_label_definition) {
 				add_label(&(host->labels), label_name, og_counter, True, False, False); /*add the label to the label table*/
+				if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			}
 			break;
 		
@@ -116,24 +121,26 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, co
 	if(strcmp(segment, ".data") == 0){
 		/* case for .data instruction*/
 		error_temp = data_inst(host, line, DC, linecnt);
-		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 	}
 	else if(strcmp(segment, ".string") == 0){
 		/* case for .string instruction*/
 		error_temp = string_inst(host, line, DC, linecnt);
-		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 	}
 	else if(strcmp(segment, ".extern") == 0){
 		/* case for .extern instruction*/
 		error_temp = extern_inst(host, line, linecnt);
-		if(error_temp != NONE) return error_temp;
+		if(error_temp != UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+		else if(error_temp != NONE) return error_temp;
 
 		error_temp = USELESS_LABEL;
 	}
 	else if(strcmp(segment, ".entry") == 0){
 		/* case for .entry instruction*/
 		error_temp = firstphase_entry_inst(host, line, linecnt);
-		if(error_temp != NONE) return error_temp;
+		if(error_temp != UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+		else if(error_temp != NONE) return error_temp;
 		
 		/* .entry is handled by the 2nd compilation phase, and so the function handling it does not conclude the handling. Yet, a label definition in the current line would be meaningless and the function must notify it is to be partially ignored. */
 		error_temp = USELESS_LABEL;
@@ -142,9 +149,7 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, co
 
 		/*if a comma is not seperated from the instruction itself by any spaces, it is considered a part of it, and so an illegal comma error will not be emitted here*/
 		error_temp = add_error(&(host->errors), ILLEGAL_INSTRUCTION_NAME, linecnt);
-		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return UNABLE_TO_ALLOCATE_MEMORY;
-		else error_temp = ILLEGAL_INSTRUCTION_NAME;
-		
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 	}
 
 	return error_temp;

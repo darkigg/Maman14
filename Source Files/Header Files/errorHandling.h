@@ -15,6 +15,7 @@ typedef enum{
 	ILLEGAL_LABEL_NAME,
 	MULTIPLE_DEF_NOT_ALLOWED, /*error for attempting to define multiple labels with the same name*/
 	ILLEGAL_LABEL_DEFINITION,
+	LABEL_ALREADY_EXTERNAL, /*...and an attempt is made to set it as an entry*/
 	ILLEGAL_FUNCTION_NAME,
 	ILLEGAL_INSTRUCTION_NAME,
 	MULTIPLE_CONSECUTIVE_COMMAS,
@@ -23,8 +24,11 @@ typedef enum{
 	NOT_ENOUGH_ARGUMENTS,
 	EXTRANEOUS_TEXT,
 	ILLEGAL_ARGUMENT,
+	UNIDENTIFIED_LABEL, /*a value which is supposed to be a label does not refer to a real label*/
+	VALUE_TOO_BIG,
+	NO_AVAILABLE_ADDRESS,
 
-	UNABLE_TO_ALLOCATE_MEMORY, /* used when the imaginary computer runs out of addresses, will lead to the termination of process on the cu*/
+	UNABLE_TO_ALLOCATE_MEMORY, /*used when a dynamic allocation fails.*/
 	
 	/*demo errors, included in this type as they create unusual circumstances and require special handling*/
 	NO_LABEL, 

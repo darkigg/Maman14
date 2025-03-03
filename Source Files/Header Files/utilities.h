@@ -65,7 +65,7 @@ boolean is_string_empty(char *str);
 
 /**
  * Ends the program and frees all memory allocations.
- * Note: only tables are dynamically allocated.
+ * Note: only tables are dynamically allocated, and so the tables host should contain all dynamically allocated memory blocks.
  * @param tables a pointer to the host of tables to free from memory.
  */
 void end_prog(tables_host *tables);

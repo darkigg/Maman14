@@ -7,7 +7,10 @@ errorType add_word(word_table *tab, const int val, const int address, boolean is
 
 	/*if the address of the word to be added does not exist in the imaginary computer's memory, it shall be reported (as there is a maximal address to that said machine)*/
 	if(address > MAX_ADDRESS || val > WORD_LIMIT)
-		return UNABLE_TO_ALLOCATE_MEMORY;
+		return NO_AVAILABLE_ADDRESS;
+
+	/* if val exceeds the maximal value which can be stored in a word, it is an error and so shall be reported. */
+	if(val > WORD_LIMIT) return VALUE_TOO_BIG;
 
 	/*assign the provided values to the newly allocated word*/
 	(*tab).table[(*tab).length - 1].address = address;

@@ -12,7 +12,7 @@ errorType translate_file(FILE *file, tables_host *host){
 
 	/* STAGE 1 */
 	error_temp = first_passage(file, host);
-	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp; /* the most urgent error, with it there is both a practical and a theoretical impossibility of the compilitation process proceeding */
+	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* the most urgent error, with it there is both a practical and a theoretical impossibility of the compilitation process proceeding */
 
 	/* STAGE 2 */
 

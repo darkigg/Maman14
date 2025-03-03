@@ -32,7 +32,8 @@ errorType read_code_line(tables_host *host, char *line, int *IC, const int linec
 
 	/*if the operation is valid, a word should be allocated for the sentence where the first word shall be*/
 	error_temp = add_word( &(host->words), 0, (*IC)++, True ); /*value is 0 for the value of op_word is yet unknown; it will be assigned later.*/
-	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+	ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)
+
 	startword_index = host->words.length - 1; /*for the first word is now the most recent entry to the table */
 
 	/* so far, the following data can be supplied to op_word regarding the sentence: */
@@ -164,7 +165,7 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 				addressing_manner = IMMEDIATE_ADDRESS;
 				if(is_string_numeric(token + 1)){ /*checks whether token contains a valid integer (1 is added to token because token contains the prefix # which is not numeric nor is it a part of the number)*/
 					error_temp = add_word( &(host->words), create_regular_word(atoi(token+1), True, False, False), (*IC)++, True); /*add the number to the words table*/
-					if(error_temp != NONE) return error_temp;
+					ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)
 				}
 
 				break;
@@ -185,11 +186,11 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 
 				/*create a word which will store the necessary value later on*/
 				error_temp = add_word( &(host->words), 0, (*IC)++, True ); /*allocates a word slot for the address of the label*/
-				if(error_temp != NONE) return error_temp;
+				ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)
 
 				/*add an entry to the label arguments table so that a fitting value will be applied to the word during the 2nd assembler phase*/
 				error_temp = add_label_argument( &(host->lab_args), linecnt, host->words.length-1 /*the most recent index, as the word for the label is the most recent*/, token);
-				if(error_temp != NONE) return error_temp;
+				if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 
 				break;
 		}

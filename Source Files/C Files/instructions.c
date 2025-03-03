@@ -10,10 +10,10 @@ errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 
 	/*get_arg_list returns NULL if an argument list was not found; .data must receive at least some arguments and so an error must be reported*/
 	if(line == NULL) error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
-	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+	return error_temp;
 
 	if(line[0] == ',') error_temp = add_error(&(host->errors), ILLEGAL_COMMA, linecnt); /*there's a comma at the beginning of the argument list, meaning there's a comma immediately following the instruction*/
-	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+	return error_temp;
 
 	/* split it up by commas and scan */
 	if(error_temp == NONE) for(segment  = strtok(line, ','); segment; segment = strtok(NULL, ',')){
@@ -21,21 +21,21 @@ errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 
 		if(is_comma_missing(segment)){/*if a comma is missing, add a missing comma error and ensure it succeeded*/
 			error_temp = add_error(&(host->errors), MISSING_COMMA, linecnt);
-			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+			return error_temp;
 
 			break; /*there is an error in the line, continuing to read it will be meaningless*/
 		}
 
 		else if(!is_string_numeric(segment)){/*if the argument is not numeric, space cannot be allocated to it*/
 			error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
-			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+			return error_temp;
 
 			break; /*again, there is an error in the line, continuing to read it will be meaningless*/
 		}
 
 		value = atoi(segment); /*convert the argument to an integer*/ 
 		error_temp = add_word( &(host->data_words), value, (*DC)++, False ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
-		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+		ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)
 		
 	}
 
@@ -67,7 +67,7 @@ errorType string_inst(tables_host *host, char *line, int *DC, const int linecnt)
 		/*i starts at 1 because the first character in line is a ", yet it is not a part of the string*/
 
 		error_temp = add_word( &(host->data_words), char_temp, (*DC)++, False ); /*adds the character to the table of words; increments the value of DC as a data word has been encountered. */
-		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
+		ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)
 	}
 
 	/* a loop iterating what is left of the line after the string has ended, to ensure no additional arguments were listed as that is illegal */
