@@ -12,6 +12,15 @@
 #include "words.h"
 #include "read_am.h"
 
+/* addressing methods codes */
+
+enum address_method{
+	IMMEDIATE_ADDRESS,
+	DIRECT_ADDRESS,
+	VARIABLE_ADDRESS,
+	DIRECT_REGISTER_ADDRESS
+};
+
 /*amount of operations*/
 #define FUNCOUNT 16
 
@@ -39,8 +48,6 @@ typedef enum{
 } operationType;
 
 #define FUNCT_VALS {0, 0, 1, 2, 0, 1, 2, 3, 4, 1, 2, 3, 0, 0, 0, 0} /*an array of all funct values for the operations*/
-
-/*since the enum operationType is sorted according to the opcode ascending order, the op code can be calculated for each operation using the enum's value and the funct value*/
 
 /**
  * This function, given a line with an operation, writes the operation and its arguments into language code words.
@@ -79,5 +86,30 @@ int op_arg_count(operationType type);
  * @return the most recently encountered error during the function's operation, or NONE if none were.
  */
 errorType read_op_args(startword *word, tables_host *host, char *arg_list, int expected_argument_count, int *IC, const int linecnt, boolean interpret_labels);
+
+/**
+ * This function, given an operation's opcode and the address method of which an attempted usage is made, will check whether or not the operation can accept that address method.
+ * @param opcode the operation's opcode.
+ * @param address_method the attempted addressing method.
+ * @return whether or not the address method is acceptable for the operation.
+ */
+boolean is_address_method_valid(int opcode, int address_method);
+
+/**
+ * Given an operation type, the function returns the corresponding opcode matching the operation type.
+ * @param op the operation type.
+ * @return the opcode.
+ */
+int get_opcode(operationType op);
+
+/**
+ * A function for adding arguments dependant on labels to a label_arguments_table.
+ * @param lab_args a pointer to the table of label arguments, to which a word will be added.
+ * @param line the line at which the argument appears within the code.
+ * @param ind the index of the word to which the 2nd passage should write (if there is no such, enter a negative value).
+ * @param arg a string containing the argument itself to be scanned.
+ * @return the most recently encountered error during the function's execution.
+ */
+errorType add_label_argument(label_arguments_table *lab_args, int line, int ind, char *arg);
 
 #endif

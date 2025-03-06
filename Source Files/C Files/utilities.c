@@ -1,6 +1,21 @@
 #include "../Header Files/utilities.h"
 /*this file includes definitions for functions which are used throughout the assembler and are not useful only for specific sections, nor do they have much in relation with other functions.*/
 
+void remove_spaces(char *str){
+
+	char *get_ind, /* the address within str which is tested for whether it contains a whites character or not */
+		*put_ind; /* the address within str where the next non-white character will be placed */
+
+	/* a loop going over all addresses a part of str */
+	for(get_ind = str, put_ind = str; (*get_ind) != '\0'; get_ind++){
+		if(!IS_WHITESPACE((*get_ind))){ /* only if the address does not contain a white character can its value be put into put_ind */
+			*put_ind = *get_ind;
+			put_ind++; /*put_ind will only progress when a character is placed, and that will always be white according to the preceeding condition*/
+		}
+	}	
+	*put_ind = '\0';
+}
+
 boolean string_slicencpy(const char* source, char* destination, int start, int end){
 
 	int i, char_temp;
@@ -67,4 +82,10 @@ boolean is_string_empty(char *str){
 	}
 
 	return True; /* the string is indeed void of meaningful content */
+}
+
+void end_prog(tables_host *tables){
+	free_tables_host(tables);
+	
+	exit(1); /* 1 is used because the program did not finish execution smoothly */
 }

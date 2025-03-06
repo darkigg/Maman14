@@ -87,3 +87,13 @@ errorType add_label(label_table *labels, char name[MAXLABEL], int address, boole
 
 	return NONE;
 }
+
+struct label_table_line* get_label(label_table *labels, char *label_name){
+	int i;
+
+	for(i = 0; i<labels->length; i++)
+		if(strcmp(labels->table[i].name, label_name) == 0)
+			return (labels->table) + i;
+
+	return NULL; /*if a pointer wasn't already returned, the function could not find the label provided and so it returns a NULL pointer.*/
+}
