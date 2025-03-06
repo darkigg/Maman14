@@ -4,7 +4,7 @@
 errorType first_passage(FILE *file, tables_host *host){
 	
 	/* the currently read line */
-	char line[MAX_LINE];
+	char line[MAX_LINE + 1]; /*+1 for the sake of potential extraneous text*/
 
 	/* the most recently encountered error */
 	errorType error_temp = NONE;
@@ -13,13 +13,19 @@ errorType first_passage(FILE *file, tables_host *host){
 	int DC = 0, IC = INITIAL_ADDRESS, line_counter = 0;
 
 	while( fgets(line, MAX_LINE, file) != NULL ){
+
+		if(line[80] != '\0'){ /*if the 81st character isn't \0, there are more than 80 characters in the line*/
+			error_temp = add_error( &(host->errors), LINE_TOO_LONG, line_counter + 1 /*as the counter is only decremented later*/);
+			continue; /*an error is already detected, and so the program shall continue to the next line*/
+		}
+
 		error_temp = first_passage_line(line, host, &IC, &DC, ++line_counter);
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* an error of not enough memory requires immidiate termination of the program */
 		else if(error_temp == NO_AVAILABLE_ADDRESS) break; /*if there are no more available addresses for words in the imaginary computer, there is no need to go over the rest of the program */
 	}
 
 	/* integrate the table of data words into the main table of words */
-	error_temp = append_words_table(&(host->words), host->data_words);
+	error_temp = append_data_words_table(&(host->words), host->data_words, IC);
 
 	return error_temp;
 

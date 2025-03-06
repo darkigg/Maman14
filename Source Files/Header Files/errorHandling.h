@@ -25,6 +25,7 @@ typedef enum{
 	EXTRANEOUS_TEXT,
 	ILLEGAL_ARGUMENT,
 	UNIDENTIFIED_LABEL, /*a value which is supposed to be a label does not refer to a real label*/
+	CANNOT_GET_EXTERN_LABEL_ADDRESS,
 	VALUE_TOO_BIG,
 	NO_AVAILABLE_ADDRESS,
 

@@ -64,7 +64,7 @@ int startword_to_value(startword word){
 	return result;
 }
 
-errorType append_words_table(word_table *tabA, const word_table tabB){
+errorType append_data_words_table(word_table *tabA, const word_table tabB, int IC){
 	struct word_table_line *line_temp_A, *line_temp_B; /* variables used for iteration in the loop copying the lines of tabB into the newly allocated segments of tabB */
 
 	/* EXTEND_TABLE() is not used, as it is more efficient to extend the table by the required length in a single go rather than making multiple extensions of a single line; EXTEND_TABLE() can only add 1 line to the table at a time. */
@@ -72,8 +72,10 @@ errorType append_words_table(word_table *tabA, const word_table tabB){
 	if( tabA->table == NULL ) return UNABLE_TO_ALLOCATE_MEMORY; /* as the dynamic allocation failed */
 
 	/* a loop iterating over all lines in tabB, copying their values into the matchingly allocated lines in tabA. */
-	for(line_temp_A = (tabA->table) + (tabA->length), line_temp_B = tabB.table; line_temp_A && line_temp_B; line_temp_A++, line_temp_B++)
+	for(line_temp_A = (tabA->table) + (tabA->length), line_temp_B = tabB.table; line_temp_A && line_temp_B; line_temp_A++, line_temp_B++){
 		*line_temp_A = *line_temp_B;
+		(*line_temp_A).address+=IC; /*add the IC in order to set the address of the word to the correct address*/
+	}
 
 	return NONE; /* The only error which could have been encountered in this function is a failed dynamic allocation. If the program made it thus far, it was not encountered. */
 }

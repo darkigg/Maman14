@@ -82,8 +82,9 @@ int startword_to_value(startword word);
  * Given 2 word tables, the function appends the latter to the former. Defined only for word tables as only they require it.
  * @param tabA pointer to the table, to which the other will be appended.
  * @param tabB the table appended to tabA.
+ * @param IC the ultimate IC value.
  * @return the most recently encountered error during the function's execution.
  */
-errorType append_words_table(word_table *tabA, const word_table tabB);
+errorType append_data_words_table(word_table *tabA, const word_table tabB, int IC);
 
 #endif
