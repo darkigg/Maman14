@@ -1,4 +1,4 @@
-#include "../Header Files/instructions.h"
+#include "../HeaderFiles/instructions.h"
 /*this file includes definitions for functions handling and executing specific instructions encountered in the code*/
 
 errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){

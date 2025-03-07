@@ -1,4 +1,4 @@
-#include "../Header Files/read_am.h"
+#include "../HeaderFiles/read_am.h"
 
 errorType second_passage(tables_host *host){
 	/* the 2nd passage consists of a loop iterating over all label arguments detected during the 1st passage */

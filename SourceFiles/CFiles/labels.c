@@ -1,7 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
-
-#include "../Header Files/labels.h"
+#include "../HeaderFiles/labels.h"
 
 /*this file includes functions for handling labels*/
 

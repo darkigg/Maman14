@@ -1,4 +1,4 @@
-#include "../Header Files/compileFunc.h"
+#include "../HeaderFiles/compileFunc.h"
 /* this file includes the definitions of the functions processing code sentences in the assembly code into binary words */
 
 errorType read_code_line(tables_host *host, char *line, int *IC, const int linecnt, boolean interpret_labels){

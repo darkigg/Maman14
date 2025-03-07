@@ -8,15 +8,6 @@ The functions here potentially could, though, call functions from other headers 
 #include <stdlib.h>
 #include <string.h>
 
-#include "tables.h"
-#include "errorHandling.h"
-#include "labels.h"
-#include "utilities.h"
-#include "instructions.h"
-#include "compileFunc.h"
-
-/* stores the type of instruction, as each different instruction requires widely different implementation */
-
 /* stores the type of program sentence */
 typedef enum{
 	INSTRUCTION /*data*/,
@@ -26,21 +17,47 @@ typedef enum{
 } sentenceType;
 
 /**
+ * Table type used to encapsulate all arguments across the code which can only be inferred during the 2nd passage.
+ * The 2nd passage's only operation is iteration over this table, whilst writing necessary values into the provided words.
+ */
+struct label_arguments_table_line{
+	int line;
+	int word_ind; /* will be negative if there is no word to infer, essentially in a .entry instruction */
+	char arg[MAXLABEL + 1]; /*an argument in this table contains a label name and a potential & preceeding it; therefore the argument will not be longer than the max length of a label name plus 1 additional character.*/
+};
+typedef struct{
+	struct label_arguments_table_line *table;
+	int length;
+} label_arguments_table;
+
+/*includes should be after all the type declarations, to avoid situations of necessary declarations not being made prior to the files inclusion*/
+#include "tables.h"
+#include "errorHandling.h"
+#include "labels.h"
+#include "utilities.h"
+#include "instructions.h"
+#include "compileFunc.h"
+ 
+/**
  * Function responsible for general translation process.
  * @param file the .am file to translate to binary.
  * @param host the host of tables.
+ * @param ICF a pointer to the overall instructions counter of the program.
+ * @param DCF a pointer to the overall data counter of the program.
  * @return latest error encountered before function termination.
  */
-errorType translate_file(FILE *file, tables_host *host);
+errorType translate_file(FILE *file, tables_host *host, int *ICF, int *DCF);
 
 /**
  * Function responsible for the 1st stage of the assembler.
  * The first stage is responsible for setting up the label table and translating every line that does not use labels to machine code.
  * @param file the .am file to read.
  * @param host the host of tables.
+ * @param ICF a pointer to the overall instructions counter of the program.
+ * @param DCF a pointer to the overall data counter of the program.
  * @return latest error encountered before function termination.
  */
-errorType first_passage(FILE *file, tables_host *host);
+errorType first_passage(FILE *file, tables_host *host, int *ICF, int *DCF);
 
 /**
  * Function responsible for processing each line read during the first stage of the assembly.
@@ -69,13 +86,5 @@ errorType second_passage(tables_host *host);
  * @return the most recent error encountered, if none were then NONE.
  */
 errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, const int linecnt);
-
-/**
- * This function gets the start of the argument list for a certain line.
- * @param line the line to seek the argument list in.
- * @return a pointer to the beginning of the argument list (without preceeding spaces), or NULL if there is no.
- */
-char *get_arg_list(char *line);
-
 
 #endif

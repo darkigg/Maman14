@@ -3,12 +3,34 @@
 #ifndef LABELS
 #define LABELS
 
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * Table type capable of containing all labels encountered, their addresses and all of their assigned attributes.
+ */
+struct label_table_line{
+	unsigned int value;
+	char name[MAXLABEL];
+
+	/* all the identifiers a label can have */
+	int data : 1;
+	int code : 1;
+	int external : 1;
+	int entry : 1;
+
+	/*note: if all identifiers are False (0), the label is ignored.*/
+};
+typedef struct {
+	struct label_table_line * table;
+	int length;
+} label_table;
+
+/*includes should be after all the type declarations, to avoid situations of necessary declarations not being made prior to the files inclusion*/
 #include "errorHandling.h"
 #include "utilities.h"
 #include "tables.h"
-
-#define MAXLABEL 31 /*maximal length of a label*/
-
+  
 /**
  * This function, given the first token of a line seperated by whitespaces, seeks a label within that line.
  * @param segment the token from which to attempt extracting the label.

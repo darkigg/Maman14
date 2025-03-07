@@ -1,4 +1,4 @@
-#include "../Header Files/utilities.h"
+#include "../HeaderFiles/utilities.h"
 /*this file includes definitions for functions which are used throughout the assembler and are not useful only for specific sections, nor do they have much in relation with other functions.*/
 
 void remove_spaces(char *str){
@@ -84,8 +84,16 @@ boolean is_string_empty(char *str){
 	return True; /* the string is indeed void of meaningful content */
 }
 
-void end_prog(tables_host *tables){
-	free_tables_host(tables);
-	
-	exit(1); /* 1 is used because the program did not finish execution smoothly */
+char *get_arg_list(char *line){
+	int i, char_temp, prev_char,prev_non_white_char = '\0' /*prev_char stores the last non_white character*/;
+	boolean was_comment_passed = False;
+
+	for(char_temp = line[0], i = 0; char_temp != '\0'; prev_char = char_temp, char_temp = line[++i]){
+		if(char_temp != ' ' && prev_char == ' ' && prev_non_white_char != ':')
+			break; /*if the above conditions are met, we will have found the supposed beginning of the argument list, as it is the first block of characters seperated by space from something that is not a label declaration*/
+
+		prev_non_white_char = (IS_WHITESPACE(char_temp))? prev_non_white_char : char_temp;
+	}
+
+	return (char_temp == '\0')? NULL : line + i; /*if char is at index i within line and char is at the beginning of the argument list, line + i will point to that index; although if char_temp is the end of the line the function was deemed to return NULL*/
 }

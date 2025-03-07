@@ -1,4 +1,4 @@
-#include "../Header Files/words.h"
+#include "../HeaderFiles/words.h"
 /*this file includes functions that handle the words read and to be written during the assembler's operation*/
 
 errorType add_word(word_table *tab, const int val, const int address, boolean is_code){

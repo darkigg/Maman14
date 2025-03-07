@@ -6,12 +6,6 @@
 
 #include <string.h>
 
-#include "errorHandling.h"
-#include "tables.h"
-#include "utilities.h"
-#include "words.h"
-#include "read_am.h"
-
 /* addressing methods codes */
 
 enum address_method{
@@ -48,6 +42,14 @@ typedef enum{
 } operationType;
 
 #define FUNCT_VALS {0, 0, 1, 2, 0, 1, 2, 3, 4, 1, 2, 3, 0, 0, 0, 0} /*an array of all funct values for the operations*/
+
+/*includes should be after all the type declarations, to avoid situations of necessary declarations not being made prior to the files inclusion*/
+#include "errorHandling.h"
+#include "tables.h"
+#include "utilities.h"
+#include "words.h"
+#include "read_am.h"
+
 
 /**
  * This function, given a line with an operation, writes the operation and its arguments into language code words.

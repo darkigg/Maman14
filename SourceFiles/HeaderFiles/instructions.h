@@ -36,7 +36,7 @@ errorType string_inst(tables_host *host,char *line, int *DC, const int linecnt);
  * @return the most recent error encountered.
  */
 errorType extern_inst(tables_host *host, char *line, const int linecnt);
-
+ 
 /**
  * A function for 1st assembler phase handling of the .entry instruction.
  * @param host pointer to the host of tables.
