@@ -4,6 +4,7 @@
 #define ERROR_HANDLING
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "constants.h"
 #include "tables.h"

@@ -1,36 +1,25 @@
-/* This file includes definition of labels and functions for storing and iterperting them*/
+/*This file contains prototypes for functions related to label handling*/
 
-#ifndef LABELS
-#define LABELS
+#ifndef LABEL_HANDLING
+#define LABEL_HANDLING
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * Table type capable of containing all labels encountered, their addresses and all of their assigned attributes.
- */
-struct label_table_line{
-	unsigned int value;
-	char name[MAXLABEL];
-
-	/* all the identifiers a label can have */
-	int data : 1;
-	int code : 1;
-	int external : 1;
-	int entry : 1;
-
-	/*note: if all identifiers are False (0), the label is ignored.*/
-};
-typedef struct {
-	struct label_table_line * table;
-	int length;
-} label_table;
-
-/*includes should be after all the type declarations, to avoid situations of necessary declarations not being made prior to the files inclusion*/
-#include "errorHandling.h"
-#include "utilities.h"
+#include "constants.h"
 #include "tables.h"
-  
+
+/**
+ * A function for adding arguments dependant on labels to a label_arguments_table.
+ * @param lab_args a pointer to the table of label arguments, to which a word will be added.
+ * @param line the line at which the argument appears within the code.
+ * @param ind the index of the word to which the 2nd passage should write (if there is no such, enter a negative value).
+ * @param arg a string containing the argument itself to be scanned.
+ * @return the most recently encountered error during the function's execution.
+ */
+errorType add_label_argument(label_arguments_table *lab_args, int line, int ind, char *arg);
+
 /**
  * This function, given the first token of a line seperated by whitespaces, seeks a label within that line.
  * @param segment the token from which to attempt extracting the label.
@@ -40,14 +29,6 @@ typedef struct {
  * @return the most recent error encountered by the function.
  */
 errorType scan_for_label(const char *segment, tables_host *host, int line_n, char *name);
-
-/**
- * Verifies validity of a label name, emitting an error if it is not.
- * @param label the label whose validity is to be verified.
- * @param host the table host.
- * @return NONE if the label is valid, a corresponding error type otherwise.
- */
-errorType is_label_def_valid( const char *label, const tables_host host );
 
 /**
  * adds a label to a label table, with a name, address and identifiers.

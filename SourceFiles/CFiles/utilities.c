@@ -1,5 +1,5 @@
 #include "../HeaderFiles/utilities.h"
-/*this file includes definitions for functions which are used throughout the assembler and are not useful only for specific sections, nor do they have much in relation with other functions.*/
+/*this file includes definitions for functions which do not require any special types defined in the program (with the exception of constants or boolean)*/
 
 void remove_spaces(char *str){
 
@@ -96,4 +96,15 @@ char *get_arg_list(char *line){
 	}
 
 	return (char_temp == '\0')? NULL : line + i; /*if char is at index i within line and char is at the beginning of the argument list, line + i will point to that index; although if char_temp is the end of the line the function was deemed to return NULL*/
+}
+
+boolean is_comma_missing(char* token){
+	boolean finished_reading_arg = False; /*did the function already encounter (within the token) a white space character preceeded by a non-white one?*/
+
+	for(token++ /*no need to read the first char as the one before it was undefined*/; *token != '\0'; token++){
+		if(IS_WHITESPACE((*token)) && !IS_WHITESPACE( (*(token - 1)) )) finished_reading_arg = True; /* if token is a white character and the previous character is not white, it is the end of an argument*/
+		else if(!IS_WHITESPACE((*token)) && finished_reading_arg) return True; /*there is a non-white character despite the end of the argument having already been encountered*/
+	}
+
+	return False; /*no case of missing comma was encountered.*/
 }

@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../HeaderFiles/constants.h"
 #include "../HeaderFiles/tables.h"
-#include "../HeaderFiles/utilities.h"
 #include "../HeaderFiles/read_am.h"
-#include "../HeaderFiles/create_output_files.h"
+#include "../HeaderFiles/error_handling.h"
+#include "../HeaderFiles/output_files_creation.h"
 
 /*this file includes the main function.*/
 
@@ -57,7 +58,7 @@ int main(int argc, char *argv[]){
 
 		/* create the output files */
 		if(!print_err(&(tables.errors), file_name)){ /*print_err will return 0 if no errors were printed, meaning none were encountered, meaning the output files shall be created; therefore they will be.*/
-
+			create_obj_file(tables.words, ICF, DCF, file_name);
 		}
 
 		/* unload of tables from the heap */

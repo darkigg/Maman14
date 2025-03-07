@@ -1,30 +1,17 @@
-/* a header containing non usage-specific types found throughout the entire program*/
+/*This header includes general macros and functions for handling the different parts of the program, which do not depend on any new type defined in the program*/
 
 #ifndef UTILITIES
 #define UTILITIES
 
-#include <string.h>
+#include "string.h"
 
-/* array of all words used by the assembly language, represented as strings*/
-#define LANGUAGE_WORDS {"mov", "cmp", "add", "sub", "lea", "clr", "not", "inc", "dec", "jmp", "bne", "jsr", "red", "prn", "rts", "stop", "mcro", "mcroend", ".data", ".string", ".extern", ".entry", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r0"}
-
-#define MAXLINE 80
-
-#define MAXLABEL 31 /*maximal length of a label*/
-
-#define SIZE_OF_ADDRESS 21
+#include "constants.h"
 
 /* checks whether a char x is a letter */
 #define IS_LETTER(x) ( ('a' <= x && x <= ' z') || ('A' <= x && x <= 'Z') )
 
 #define IS_WHITESPACE(x) ( x == ' ' || x == '\t' || x == '\n')
 
-/* used to represent booleanic resaults of functions */
-typedef enum{
-	True = 1,
-	False = 0
-} boolean;
- 
 /**
  * A function taking a string and removing all the white characters in it.
  * @param str the string to edit.
@@ -69,5 +56,12 @@ boolean is_string_empty(char *str);
  * @return a pointer to the beginning of the argument list (without preceeding spaces), or NULL if there is no.
  */
 char *get_arg_list(char *line);
+
+/**
+ * Given a token between 2 commas, this function checks whether or not the token contains more arguments than legal.
+ * @param token ther token.
+ * @return whether or not there is more than a single argument in the token (e.g. a non white character spotted after the end of the argument).
+ */
+boolean is_comma_missing(char* token);
 
 #endif

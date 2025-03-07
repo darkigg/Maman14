@@ -1,5 +1,4 @@
-#include "../HeaderFiles/instructions.h"
-/*this file includes definitions for functions handling and executing specific instructions encountered in the code*/
+#include "../HeaderFiles/read_am.h"
 
 errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 	char *segment; /*the currently iterated over token*/

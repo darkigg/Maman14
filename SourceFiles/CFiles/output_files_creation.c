@@ -1,4 +1,4 @@
-#include "../HeaderFiles/create_output_files.h"
+#include "../HeaderFiles/output_files_creation.h"
 
 void create_obj_file(const word_table words, int ICF, int DCF, char *file_name){
 	

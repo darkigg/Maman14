@@ -1,4 +1,4 @@
-#include "../HeaderFiles/tables.h"
+#include "../HeaderFiles/table_functions.h"
 /*this file includes definitions of functions for general table handling and tables host handling*/
 
 /*initiate_tables_host does not return a certification of successful operation as it uses malloc(0) which practically cannot fail*/
