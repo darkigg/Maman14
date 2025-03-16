@@ -5,6 +5,8 @@
 
 #include <string.h>
 
+#include "tables.h"
+
 /* array of all words used by the assembly language, represented as strings*/
 #define LANGUAGE_WORDS {"mov", "cmp", "add", "sub", "lea", "clr", "not", "inc", "dec", "jmp", "bne", "jsr", "red", "prn", "rts", "stop", "mcro", "mcroend", ".data", ".string", ".extern", ".entry", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r0"}
 
@@ -24,11 +26,10 @@ typedef enum{
 } boolean;
 
 /**
- * A function taking a string, removing all the white characters in it and replacing those that are between 2 non-white characters with a given character.
- * @param str the string to edit. The max length of str is MAX_LINE.
- * @param replacement the character to replace the spaces with.
+ * A function taking a string and removing all the white characters in it.
+ * @param str the string to edit.
  */
-void replace_spaces(char *str, char replacement);
+void remove_spaces(char *str);
 
 /**
  * Copies all characters between the given indicies from the source string to the destination one, essentially slicing it.
@@ -61,5 +62,12 @@ boolean is_string_numeric(const char *str);
  * @return whether or not a non-white character was found in str.
  */
 boolean is_string_empty(char *str);
+
+/**
+ * Ends the program and frees all memory allocations.
+ * Note: only tables are dynamically allocated, and so the tables host should contain all dynamically allocated memory blocks.
+ * @param tables a pointer to the host of tables to free from memory.
+ */
+void end_prog(tables_host *tables);
 
 #endif

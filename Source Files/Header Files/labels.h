@@ -39,4 +39,12 @@ errorType is_label_def_valid( const char *label, const tables_host host );
  */
 errorType add_label(label_table *labels, char name[MAXLABEL], int address, boolean code, boolean external, boolean data);
 
+/**
+ * finds a given label within a given table of labels, according to its name.
+ * @param labels a pointer to the table of labels.
+ * @param label_name the name of the label to look up.
+ * @return a pointer to the line of the table at which the label and all of its data is stored.
+ */
+struct label_table_line* get_label(label_table *labels, char *label_name);
+
 #endif
