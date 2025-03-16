@@ -1,0 +1,298 @@
+/*  ☆   */ /*  ☆   */ /*  ☆   */ /*  ☆   */ /*  ☆   */
+
+#include "../Header Files/tables.h"
+#include "macros.h"
+#include "utilities.h"
+#include "errorHandling.h"
+#include <stdio.h>
+#include <ctype.h>
+
+#define MAX_MACRO_NAME 31
+#define WHITESPACES " \t"
+#define FOREVER for(;;)
+
+
+struct macro_table_line{
+	char name[MAX_MACRO_NAME];
+	char *content;
+};
+typedef struct macro_table_line * macro_table;
+
+int macro_final(char *filename, macro_table mcroTable)
+/* This functin gets a file and checks for macro definitions inside this file.
+the macro definition starts with "mcro" and a name next to it, and ends with "mcroend".
+all the content in between goes into the Macro Table where each content is conected to its name.
+if there is an error that break the rule such as:
+1- macro name syntax error
+2- macro name is a language name
+3- another label other then the ones specified for macro def
+if one of these errors where found, the error goes into the error table, there it gets handled.
+If an error is found, and the function can't proceed (for example, failure of dinamic allocation),
+the function returns 0.
+if an error like this doesnt occur, it returns 1.
+
+this function uses lines with a length of 81 chars, 
+so handling it in the main function would be much easier
+(because there you could check if it had passed the line length limit) */
+
+{
+
+	/* Step 1: opening each file;
+	input file - read
+	output file - write */
+	
+	char *filename_temp_i;
+	char *filename_temp_o;
+	
+	if (!(filename_temp_i = malloc(strlen(filename) + 4)))
+		/* ERROR - Memory allocation failed	☆	 */
+		add_error(error_table, MEMORY_ALLOCATION_FAILED , 0);
+		
+		return 0;
+	if (!(filename_temp_o = malloc(strlen(filename) + 4)))
+		/* ERROR - Memory allocation failed		☆	 */
+		add_error(error_table, MEMORY_ALLOCATION_FAILED , 0);
+		free(filename_temp_i);
+		return 0;
+	sprintf(filename_temp_i, "%s.as", filename);
+	sprintf(filename_temp_o, "%s.am", filename);
+	
+	FILE *input = fopen(filename_temp_i, "r");
+	FILE *output = fopen(filename_temp_o, "w");
+	
+	free(filename_temp_i);
+	free(filename_temp_o);
+	
+	if(!input)
+	{
+		/* ERROR - Error opening files		☆	 */
+		add_error(error_table, UNABLE_OPEN_FILE , 0);
+		return 0;
+	}
+	if(!output)
+	{
+		fclose(input);
+		/* ERROR - Error opening files		☆	 */
+		add_error(error_table, UNABLE_OPEN_FILE , 0);
+		return 0;
+	}
+	
+	
+	/* Variables for the loop: */
+	
+	/* for dinamic allocations */
+	char *temp;
+	 /* For errors lines */
+	int lineCount = 0;
+	/* PLUS 1 for checking if passed the line limit  ☆ */
+	char lineOrg[MAX_LINE + 1];
+	char line[MAX_LINE + 1];
+	char c;
+	/* first string of the line (First Field): */
+	char *firstField;
+	/* second string of the line (Second Field): */
+	char *secondField;
+	/* third string of the line (Third Field): */
+	char *thirdField;
+	char mcroName[MAX_LINE];
+	/* count of total macros each time found a new one */
+	int countM = 0;
+	int macroFlag = 0;
+	/* if error in macro definition, skip the lines of this macro */
+	int errorFlag = 0;
+	/* check for number of fields */
+	int t = 0;
+	int indexMcroTable;
+	
+	/* check if reached EOF */
+	FOREVER /* FOREVER loop */
+	{ 
+	
+	
+		/* Line Management: */
+		
+		/* if came along an EOF, break */
+		if (!fgets(lineOrg, sizeof(lineOrg), input))
+			break; 
+
+		strcpy(line,lineOrg);
+		lineCount += 1;
+		if((firstField = strtok(lineOrg, WHITESPACES)) != NULL)
+		{
+			t = 1;
+			if((secondField = strtok(NULL, WHITESPACES)) != NULL)
+				t = 2;
+				if((thirdField = strtok(NULL, WHITESPACES)) != NULL)
+					t = 3;
+		}
+		/* it is a whitespace line -
+		next line (continue over the loop) */
+		else
+			continue;
+		
+		/* Step 2: if flag is on, copy the line into the table */
+		
+		
+		if (macroFlag || errorFlag)
+		{
+			if (strcmp(firstField, "mcroend") == 0)
+			{
+				macroFlag = 0;
+				errorFlag = 0;
+				if (t==1)
+				{
+					if(errorFlag)
+					{
+						/* next line */
+						continue;
+					}
+					/* if(macroFlag) */
+					else
+					{
+						countM += 1;
+						/* EXTEND TABLE 	☆	*/
+						EXTEND_TABLE(mcroTable, macro_table_line );
+						/* next line */
+						continue;
+					}
+				}
+				else
+				{
+					/* ERROR - another label rather than that	☆	 */
+					add_error(error_table, ILLEGAL_MACRO_DEFINITION , lineCount);
+					if(errorFlag)
+						continue;
+					free(mcroTable[countM].content);
+					continue;
+				}
+			}
+			if(errorFlag)
+				/* skip line */
+				continue;
+			/* copy the line into the table section */
+			temp = realloc(mcroTable[countM].content, (strlen(mcroTable[countM].content) + MAX_LINE - 1) * sizeof(char));
+			if (temp == NULL) {
+				/* ERROR - dinamic allocation failed	☆	 */
+				add_error(error_table, MEMORY_ALLOCATION_FAILED , lineCount);
+				return 0;
+			}
+			mcroTable[countM].content = temp;
+			strcat(mcroTable[countM].content, line);
+			continue;
+			
+		
+
+
+		/* Step 3:
+		locate "mcro".
+		check errors (if found - Error Flag ON),
+		and turn flag on. */
+
+		/* if found string "mcro", turn flag on */
+		if(strcmp(firstField, "mcro") == 0)
+		{
+			if (t != 2)
+			{
+				/* ERROR - another label rather than that	☆	*/
+				add_error(error_table, ILLEGAL_MACRO_DEFINITION , lineCount);
+				errorFlag = 1;
+				continue;
+			}
+			
+			strcpy(mcroName, secondField);
+			if(!is_valid_macro(mcroName))
+			{
+				/* ERROR - invalid macro name	☆	*/
+				add_error(error_table, INVALID_MACRO_NAME , lineCount);
+				errorFlag = 1;
+				continue;
+			}
+			
+			strncpy(mcroTable[countM].name, mcroName, MAX_MACRO_NAME - 1);
+			mcroTable[countM].name[MAX_MACRO_NAME - 1] = '\0';
+			
+			/* just for \0 character */
+			temp = malloc(1);
+			if (temp == NULL) {
+				/* ERROR - dinamic allocation failed	☆	 */
+				add_error(error_table, MEMORY_ALLOCATION_FAILED , lineCount);
+				return 0;
+			}
+			mcroTable[countM].content = temp;
+			
+			macroFlag = 1;
+			continue;
+		}
+		
+		
+		
+		/* Step 4: check if the first field is in the Macro Table - and replace it */
+		
+		/* writen in FORUM = 
+		if a macro name is mentioned,
+		assume there are no other chars in the line.
+		(no need for another check) */
+		indexMcroTable = is_already_mcro(firstField, mcroTable, countM);
+		if(indexMcroTable != -1)
+		{
+			/* if found succesfully, print and move onto the next line */
+			fprintf(output, "%s", mcroTable[indexMcroTable].content);
+			continue;
+		}
+
+		/* Step 5: None of the steps occured =
+		regular line (print it into the file):
+		no need for error checking in pre-asembler */
+		
+		fprintf(output, "%s", line);
+	}
+	
+	if (mcroFlag)
+	{
+		countM += 1;
+	}
+	fclose(input);
+	fclose(output);
+	return 1;
+}
+	
+
+int is_already_mcro(char *str, macro_table mcroTable, int countM)
+/* this function checks if the mentioned string is a macro
+(in the table - by its name):
+if it is - it returns its index in the Macro Table.
+if it isnt - it returns -1 */
+{
+	int i;
+	/* if no macros have been recognized so far */
+	if (countM == 0)
+		return -1;
+	for (i = 0; i < countM; i++)
+	{
+		if (strcmp(str, mcroTable[i].name) == 0)
+			return i;
+	}
+	return -1;
+}
+
+
+int is_valid_macro(char *str)
+/* check for macro name's errors:
+ 1 - syntax errors
+ 2 - a language word
+if there are any errors, it returns 0.
+if there are not errors, it returns 1. */
+{
+	if(!((str[0]>='a' && str[0]<='z') || (str[0]>='A' && str[0]<='Z') || str[0]=='_'))
+		return 0;
+	int i;
+	for(i=1; i < strlen(str); i++)
+	{
+		if(!((str[i]>='a' && str[i]<='z') || (str[i]>='A' && str[i]<='Z') || str[i]=='_' || str[i]>='0' || str[i] <='9'))
+			return 0;
+	}
+	return !is_language_word(str) && (strlen(str) <= MAX_MACRO_NAME);
+}
+
+
+
