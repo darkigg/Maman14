@@ -3,10 +3,12 @@
 #ifndef CONSTS
 #define CONSTS
 
-/*amount of operations*/
-#define FUNCOUNT 16
 
-#define MAXLINE 80
+#define FUNCOUNT 16 /*amount of operations*/
+
+#define MAXFILE 100 /*maximal length of a file name*/
+
+#define MAXLINE 80 /*maximal length of a line*/
 
 #define MAXLABEL 31 /*maximal length of a label*/
 
@@ -26,7 +28,8 @@
 
 /* an 'operation' is a general term for both instructions and functions */
 #define ERROR_TEXTS /*an array containing all the texts to be printed on screen upon error discovery, with the texts in the same order as that of their error's appearance in the above enum*/\
-	{ "Macro definition is illegal", /*ILLEGAL_MACRO_DEFINITION*/\
+	{"", /*for NONE, in order to not mess up the order*/\ 
+	"Macro definition is illegal", /*ILLEGAL_MACRO_DEFINITION*/\
 	"The line is longer (contains more characters) than the maximal legal line length (maximal amount of characters)", /*LINE_TOO_LONG*/\
 	"The name of the declared label is illegal",/*ILLEGAL_LABEL_NAME*/\
 	"Repeated declarations of a label by the same name are illegal",/*MULTIPLE_DEF_NOT_ALLOWED*/\

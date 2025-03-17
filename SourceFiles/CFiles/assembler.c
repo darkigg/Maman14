@@ -5,6 +5,7 @@
 
 #include "../HeaderFiles/constants.h"
 #include "../HeaderFiles/tables.h"
+#include "../HeaderFiles/table_functions.h"
 #include "../HeaderFiles/read_am.h"
 #include "../HeaderFiles/error_handling.h"
 #include "../HeaderFiles/output_files_creation.h"
@@ -14,10 +15,8 @@
 /*the program's main function*/
 int main(int argc, char *argv[]){
 
-	/*ADD ERROR FOR ATTEMPT AT OPENING AN ILLEGAL FILE*/
-
 	/* file access variable declarations */
-	char *file_name;
+	char file_name[MAXFILE];
 	FILE *assembly_file;
 
 	errorType error_temp;
@@ -29,14 +28,15 @@ int main(int argc, char *argv[]){
 
 	/* Loop iterating over the arguments list; argc is decremented as it is used to iterate over all arguments from the last to the first, and as the first argument is the name of the ran file. */
 	while( (--argc) > 0 && argc != 0){
-
+		
 		/* table initiations */
 		initiate_tables_host(&tables);
 
 		/* open macros */
 
 		/*add .as to the file name string*/
-		file_name = strcat(argv[argc], ".as");
+		strcpy(file_name, argv[argc]);
+		strcat(file_name, ".as");
 
 		/*open the requested .as file*/
 		assembly_file = fopen(file_name, "r");
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
 			fprintf(stderr, "File %s cannot be opened.\n", file_name);			
 			continue; /*...to the next file*/
 		}
-
+		
 		/*rid of all macros*/
 		error_temp = NONE;
 
@@ -55,9 +55,12 @@ int main(int argc, char *argv[]){
 
 		/* translate the .am file to machine code */
 		if(error_temp == NONE) error_temp = translate_file(assembly_file, &tables, &ICF, &DCF);
+		
+		strcpy(file_name, argv[argc]);
 
 		/* create the output files */
 		if(!print_err(&(tables.errors), file_name)){ /*print_err will return 0 if no errors were printed, meaning none were encountered, meaning the output files shall be created; therefore they will be.*/
+			fprintf(stdout, "\nend\n");
 			create_obj_file(tables.words, ICF, DCF, file_name);
 		}
 

@@ -64,7 +64,7 @@ boolean is_address_method_valid(int opcode, int address_method){
 
 		case 3:
 		if( opcode == 2 || opcode == 4 || opcode == 5 || opcode == 12 || opcode == 13 ) return True;
-		else False;
+		else return False;
 
 		default: return False; /*invalid*/
 	}

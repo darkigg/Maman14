@@ -9,6 +9,8 @@
 
 #include "constants.h"
 #include "tables.h"
+#include "utilities.h"
+#include "error_handling.h"
 
 /**
  * A function for adding arguments dependant on labels to a label_arguments_table.

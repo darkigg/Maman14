@@ -8,6 +8,8 @@
 
 #include "constants.h"
 #include "tables.h"
+#include "utilities.h"
+#include "table_functions.h"
 
 /**
  * Adds an error to a given error table.
@@ -24,7 +26,7 @@ errorType add_error(error_table *error_table, errorType new_error, int line);
  * @param host the table host.
  * @return NONE if the label is valid, a corresponding error type otherwise.
  */
-errorType is_label_def_valid( const char *label, const tables_host host );
+errorType is_label_def_valid( char *label, const tables_host host );
 
 /**
  * Ends the program and frees all memory allocations.

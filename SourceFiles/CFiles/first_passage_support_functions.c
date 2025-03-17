@@ -1,48 +1,50 @@
 #include "../HeaderFiles/read_am.h"
 
 errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, const int line_num){
-	char *segment, /*the token of the line currently scanned*/
+	char segment[MAXLINE], /*the token of the line currently scanned*/
 		label_name[MAXLABEL]; /*the name of a label potentially declared in this line*/
 
 	/* the original (before change) value of the counter of the program used in the sentence*/
-	int og_counter;
+	int og_counter, i, line_len;
 
 	errorType error_temp = NONE; /*the latest error encountered*/
 	boolean is_label_definition; /*whether or not a label is being define in the current line*/
 	sentenceType sentype; /*stores the type of the sentence*/
-
+	
 	/* if the sentence is a comment, it may be ignored */
 	if(line[0] == ';') return NONE;
 
+	line_len = strlen(line); /*it is more efficient to calculate this value once rather than doing so over and over again upon each loop iteration*/
+
 	/* scan for the first literal word in the line (the first row of characters enclosed by spaces from both sides) */
-	for(segment = strtok(line, ' '); segment; segment = strtok(NULL, ' ')) {
-		if( strlen(segment) != 0 || segment == NULL) break;
+	for(i = get_token(segment, line, ' ', 0, line_len); i>=0; i = get_token(segment, line, ' ', i, line_len)) {
+		if( strlen(segment) != 0 ) break;
 	}
-	if(segment == NULL) return NONE; /*empty sentence*/
-	
+	if(i>=line_len) return NONE; /*empty sentence*/
+	printf("current line is %s\n", line);
 	/*scan for a potential label definition at the start of the line*/
 	error_temp = scan_for_label(segment, host, line_num, label_name);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) return error_temp;
 
 	if(error_temp != NO_LABEL) {
 		/* case a label is defined in this line */
-		error_temp == NONE; /*in order to avoid possible confusion*/
+		error_temp = NONE; /*in order to avoid possible confusion*/
 		is_label_definition = True;
 
 		/* scans for the practically first literal word in the line, as the actual first one is a label declaration as was found above */
-		for(segment = strtok(line, ' '); segment; segment = strtok(NULL, ' ')) 
+		for(i = get_token(segment, line, ' ', 0, line_len); i>=0; i = get_token(segment, line, ' ', i, line_len)) 
 			if( strlen(segment) != 0) 
 				break;
 
-		/* if segment is NULL, no arguments were found following the label declaration; that is illegal. */
-		if(segment == NULL){
+		/* if i exceeds the length of line, no arguments were found following the label declaration; that is illegal. */
+		if(i>=line_len){
 			error_temp = add_error( &(host->errors), ILLEGAL_LABEL_DEFINITION, line_num);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			else return error_temp;
 		}
 
 	}
-
+	printf("operazion\n");
 	/* check whether or not an instruction call is being made; the sentence can either include an instruction (starting with a dot) or an operation, and there is need to act accordingly for each of these options. */
 	if(segment[0] == '.') sentype = INSTRUCTION;
 	else sentype = OPERATION;
@@ -50,8 +52,7 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 	switch(sentype){
 		case INSTRUCTION:
 			og_counter = *DC;	
-
-			/****** POTENTIAL PROBLEM HERE - YOU ARE YET UNCERTAIN REGARDING THE PRECISE METHOD OF HANDLING LABEL DEFINITIONS IN LINES WITH THE INSTRUCTION .extern AND .entry ****************************/
+			
 			error_temp = handle_instruction_passage1(DC, line, host, line_num);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			if(error_temp == NO_AVAILABLE_ADDRESS) return error_temp; /*if the error of no available address is encountered at this line, other errors are of lower importance in comparasion and therefore the function must return immediately with that error.*/
@@ -65,7 +66,7 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 
 		case OPERATION:
 			og_counter = *IC;
-
+			
 			error_temp = read_code_line(host, line, IC, line_num, False);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			if(error_temp == NO_AVAILABLE_ADDRESS) return error_temp; /*if the error of no available address is encountered at this line, other errors are of lower importance in comparasion and therefore the function must return immediately with that error.*/
@@ -86,13 +87,18 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 }
 
 errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, const int linecnt){
-	char *segment;
+	char segment[MAXLINE];
+	int i, line_len;
 	errorType error_temp = NONE;
+	printf("line is %s on handle_instruction_passage1 call\n", line);
 
-	for(segment = strtok(line, ' '); segment; segment = strtok(NULL, ' ')) 
+	line_len = strlen(line); /*again, it is more efficient not to calculate the length of a string over and over again. */
+
+	for(i = get_token(segment, line, ' ', 0, line_len); i>=0; i = get_token(segment, line, ' ', i, line_len)) 
 		/*it is required to start scanning at the instruction name, a section starting with a dot is an insturction. */
 		if(segment[0] == '.') break;
-
+	printf("the detected instruction is |%s|. also |%s| %d\n", segment, ".data", strcmp(segment, ".data"));
+	
 	if(strcmp(segment, ".data") == 0){
 		/* case for .data instruction*/
 		error_temp = data_inst(host, line, DC, linecnt);
@@ -134,18 +140,20 @@ errorType read_code_line(tables_host *host, char *line, int *IC, const int linec
 	
 	operationType op_type; /* the type of operation executed in the line */
 	errorType error_temp = NONE; 
-	char *token; /* stores the current token from line used by the function */
+	char token[MAXLINE]; /* stores the current token from line used by the function */
 	startword op_word; /*the first word of the sentence found in line*/
 	int startword_index, /* the index of the first word of the sentence found in line within the words table */
-		expected_arg_count; /* the amount of arguments passed to the operation expected to be found in line */
+		expected_arg_count, /* the amount of arguments passed to the operation expected to be found in line */
+		i, line_len;
 	int funct_values[] = FUNCT_VALS; /*an array containing the funct values for each operation*/
 
 	/*initializes the op_word:*/
 	init_startword(&op_word);
 	op_word.A = True; /*for startwords, A is always the triggered specifier*/
 
+	line_len = strlen(line);
 	/*makes token the name of the operation called*/
-	for(token = strtok(line, ' '); token; token = strtok(NULL, ' ') ){
+	for(i = get_token(token, line, ' ', 0, line_len); i>=0; i = get_token(token, line, ' ', i, line_len) ){
 		if( token[strlen(token)-1] != ':' && !(IS_WHITESPACE(token[0])) )
 			break; /*if the token does not comprise of whitespaces and does not end with a colon (a label definition), it is the operation.*/
 	}
@@ -155,7 +163,7 @@ errorType read_code_line(tables_host *host, char *line, int *IC, const int linec
 
 	/* is the operation valid? */
 	if(op_type == ILLEGAL){
-		error_temp == add_error( &(host->errors),ILLEGAL_FUNCTION_NAME, linecnt);
+		error_temp = add_error( &(host->errors),ILLEGAL_FUNCTION_NAME, linecnt);
 		return error_temp; /*no need to continue going over the line past the first error*/
 	}
 
@@ -194,22 +202,23 @@ errorType read_code_line(tables_host *host, char *line, int *IC, const int linec
 
 errorType read_op_args(startword *word, tables_host *host, char *arg_list, int expected_argument_count, int *IC, const int linecnt, boolean interpret_labels){
 
-	int i;
-	char *token; /* stores the current token from line used by the function */
+	int args_count, i, list_len;
+	char token[MAXLINE]; /* stores the current token from line used by the function */
 	errorType error_temp;
 	int addressing_manner; /* stores the manner in which an argument is to be addressed */
 
+	list_len = strlen(arg_list); /*more efficient to calculate once*/
 	/* a loop iterating over all the arguments provided to the operation in the line, if there are any*/
-	for(i = 0, token = strtok(arg_list, ','); token; token = strtok( NULL, ','), i++){
+	for(args_count = 0,i = get_token(token, arg_list, ',', 0, list_len); i>=0; i = get_token(token, arg_list, ',', i, list_len), args_count++){
 		
 		/**** ERROR CHECKING ****/
 
 		if(is_string_empty(token)){ /*there's a token between 2 commas, between the begining of the argument list and a comma or between a comma and the end of the line, which is empty*/
-			if( i == 0){
+			if( args_count == 0){
 				error_temp = add_error( &(host->errors), ILLEGAL_COMMA, linecnt); /* in this case, the comma is directly following the operation, making it illegal */
 				return error_temp;
 			}
-			else if( i >= expected_argument_count){
+			else if( args_count >= expected_argument_count){
 				error_temp = add_error( &(host->errors), EXTRANEOUS_TEXT, linecnt); /*int this case, the comma must be after all of the arguments, meaning it is an extraneous piece of text which cannot be spotted by conventional methods.*/
 				return error_temp;
 			}
@@ -218,7 +227,7 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 				return error_temp;
 			}
 		}
-		else if(i >= expected_argument_count){ /*if the token is not empty, there is an argument; if said argument appears after all expected arguments have already been scanned, it is extraneous text.*/
+		else if(args_count >= expected_argument_count){ /*if the token is not empty, there is an argument; if said argument appears after all expected arguments have already been scanned, it is extraneous text.*/
 			error_temp = add_error( &(host->errors), EXTRANEOUS_TEXT, linecnt);
 			return error_temp;
 		}
@@ -226,7 +235,7 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 		if(is_comma_missing(token)){ /*if 2 arguments or more appear within a single token*/
 			/*** a note regarding this section: I am well aware that an operation cannot accept more than 2 arguments according to the task's description, and yet I prefer handling the following case without relying on that; have it capable of accounting for more arguments. ***/
 
-			if(i < (expected_argument_count - 1)){
+			if(args_count < (expected_argument_count - 1)){
 				/*if at least 2 additional are expected ( say 12 arguments are expected and so far 10 have been counted, 10 < (12-1) ), the missing comma is before any potential extraneous text.*/
 				error_temp = add_error( &(host->errors), MISSING_COMMA, linecnt);
 				return error_temp;
@@ -282,7 +291,7 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 			return error_temp;
 		}
 
-		if((expected_argument_count == 1 && i == 0) || (expected_argument_count == 2 && i == 1)){ /*in this case, the argument is the destination*/
+		if((expected_argument_count == 1 && args_count == 0) || (expected_argument_count == 2 && i == 1)){ /*in this case, the argument is the destination*/
 			if(addressing_manner == DIRECT_REGISTER_ADDRESS)
 				word->destination_register = token[1] - '0'; /*if the argument is a register, the register number should be the 2nd character of the argument minus the 0 character constant in order to be converted to an integer*/
 			word->destination_address = addressing_manner;
@@ -293,4 +302,6 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 			word->origin_address = addressing_manner;
 		}
 	}
+
+	return error_temp;
 }

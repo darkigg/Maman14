@@ -7,7 +7,7 @@ errorType scan_for_label(const char *segment, tables_host *host, int line_n, cha
 	errorType error_temp; /*temporary storage for potentially encountered errors*/
 
 	/* only if the segment ends with a colon can it be a label definition */
-	if( !(segment[SIZE_OF_ARR(segment) - 1] == ':') ) return NO_LABEL; 
+	if( !(segment[strlen(segment) - 1] == ':') ) return NO_LABEL; 
 
 	/*if (excluding the colon) segment has more than the maximal amount of characters allowed in a label name, it contains an illegal name. It cannot be detected later on as name might be limited in size while segment is supposed to contain the whole section, as long as it was read from the file to begin with.*/
 	if( (strlen(segment) - 1) > MAXLABEL){
@@ -17,7 +17,7 @@ errorType scan_for_label(const char *segment, tables_host *host, int line_n, cha
 	}
 
 	/* slices the string to rid it of the prenthesis and copies it onto name (the original string remains unchanged) */
-	string_slicencpy(segment, name, 0, SIZE_OF_ARR(segment)-2);
+	string_slicencpy(segment, name, 0, strlen(segment)-2);
 
 	/* ensures the validity  of the found label name, emitting an error if it is not */
 	error_temp = is_label_def_valid( name, *host );

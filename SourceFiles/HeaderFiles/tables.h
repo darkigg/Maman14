@@ -3,11 +3,13 @@
 #ifndef TABLES
 #define TABLES
 
+#include "stdlib.h"
+
 #include "words.h"
 #include "constants.h"
 
 #define EXTEND_TABLE(tab, type) /*expects 'tab' to be one of the table types, and to be called only when errorType is the return type. type is the type of a single table line. */ \
-	(tab).table = (type *) realloc( (tab).table, (tab).length + sizeof((tab).table[0]) );\
+	(tab).table = (type *) realloc( (tab).table, ((tab).length + 1) * sizeof((tab).table[0]) );\
 	if((tab).table == NULL) return UNABLE_TO_ALLOCATE_MEMORY;\
 	(tab).length++
 
@@ -16,11 +18,11 @@
  */
 struct error_table_line{
 	errorType error;
-	int line_number;
+	unsigned int line_number;
 };
 typedef struct{
 	struct error_table_line *table;
-	int length;
+	unsigned int length;
 } error_table;
 
 /**
@@ -28,13 +30,13 @@ typedef struct{
  * The 2nd passage's only operation is iteration over this table, whilst writing necessary values into the provided words.
  */
 struct label_arguments_table_line{
-	int line;
-	int word_ind; /* will be negative if there is no word to infer, essentially in a .entry instruction */
+	unsigned int line;
+	unsigned int word_ind; /* will be negative if there is no word to infer, essentially in a .entry instruction */
 	char arg[MAXLABEL + 1]; /*an argument in this table contains a label name and a potential & preceeding it; therefore the argument will not be longer than the max length of a label name plus 1 additional character.*/
 };
 typedef struct{
 	struct label_arguments_table_line *table;
-	int length;
+	unsigned int length;
 } label_arguments_table;
 
 /** 
@@ -46,7 +48,7 @@ struct macro_table_line{
 };
 typedef struct {
 	struct macro_table_line *table;
-	int length;
+	unsigned int length;
 } macro_table;
 
 /**
@@ -54,13 +56,13 @@ typedef struct {
  */
 struct word_table_line{
 	assembly_word word;
-	int address : 21; /*the maximal bits in which an address can be stored*/
-	int data : 1;
-	int code : 1;
+	unsigned int address : 21; /*the maximal bits in which an address can be stored*/
+	unsigned int data : 1;
+	unsigned int code : 1;
 };
 typedef struct{
 	struct word_table_line *table;
-	int length;
+	unsigned int length;
 } word_table;
 
 /**
@@ -71,16 +73,16 @@ struct label_table_line{
 	char name[MAXLABEL];
 
 	/* all the identifiers a label can have */
-	int data : 1;
-	int code : 1;
-	int external : 1;
-	int entry : 1;
+	unsigned int data : 1;
+	unsigned int code : 1;
+	unsigned int external : 1;
+	unsigned int entry : 1;
 
 	/*note: if all identifiers are False (0), the label is ignored.*/
 };
 typedef struct {
 	struct label_table_line * table;
-	int length;
+	unsigned int length;
 } label_table;
 
 /**

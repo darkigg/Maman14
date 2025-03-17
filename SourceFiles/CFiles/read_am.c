@@ -4,17 +4,13 @@
 /*the basic function initiating the 2 main assembly stages*/
 errorType translate_file(FILE *file, tables_host *host, int *ICF, int *DCF){
 	/* DECLARATIONS */
-	char line[MAXLINE]; /*stores the current line*/
-	int line_counter = 0; /*counter of lines read so far*/
 	errorType error_temp; /*a variable naming convention throughout the .am file analysis, for variables containing the most recent error*/
-
-	/*counters*/
-	int IC = 0, DC = 0;
 
 	/* STAGE 1 */
 	error_temp = first_passage(file, host, ICF, DCF);
+	
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* the most urgent error, with it there is both a practical and a theoretical impossibility of the compilitation process proceeding */
-
+	printf("\nat last\n");
 	/* STAGE 2 */
 	error_temp = second_passage(host);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
@@ -39,22 +35,25 @@ errorType first_passage(FILE *file, tables_host *host, int *ICF, int *DCF){
 	*ICF = 100;
 	*DCF = 0;
 
-	while( fgets(line, MAXLINE, file) != NULL ){
-
-		if(line[80] != '\0'){ /*if the 81st character isn't \0, there are more than 80 characters in the line*/
+	while( fgets(line, MAXLINE+1, file) != NULL ){
+		 
+		if(strlen(line) > MAXLINE){ /*if the 81st character isn't \0, there are more than 80 characters in the line*/
+			
 			error_temp = add_error( &(host->errors), LINE_TOO_LONG, line_counter + 1 /*as the counter is only decremented later*/);
+			
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			continue; /*an error is already detected, and so the program shall continue to the next line*/
 		}
-
+		
 		error_temp = first_passage_line(line, host, ICF, DCF, ++line_counter);
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* an error of not enough memory requires immidiate termination of the program */
 		else if(error_temp == NO_AVAILABLE_ADDRESS) break; /*if there are no more available addresses for words in the imaginary computer, there is no need to go over the rest of the program */
 	}
-
-	/* integrate the table of data words into the main table of words */
-	error_temp = append_data_words_table(&(host->words), host->data_words, *ICF);
-
+	printf("first passage concluded:\n data tab len: %d\n instruction tab len: %d\n IC: %d\n DC: %d\n error: %d\n", host->data_words.length, host->words.length, *ICF, *DCF, error_temp);
+	/* integrate the table of data words into the main table of words; if errors were encountered, it is not necessary */
+	if(error_temp == NONE) error_temp = append_data_words_table(&(host->words), host->data_words, *ICF);
+	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+	printf("append function concluded. first value: %d\n", host->words.table[0].word.value);
 	return error_temp;
 
 }
@@ -105,4 +104,6 @@ errorType second_passage(tables_host *host){
 		}
 
 	}
+
+	return error_temp;
 }

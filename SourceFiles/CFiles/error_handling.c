@@ -3,13 +3,13 @@
 errorType add_error(error_table *error_table, errorType new_error, int line){
 	EXTEND_TABLE((*error_table), struct error_table_line);
 
-	(*error_table).table[SIZE_OF_ARR(error_table) - 1].error = new_error;
-	(*error_table).table[SIZE_OF_ARR(error_table) - 1].line_number = line;
+	(*error_table).table[error_table->length - 1].error = new_error;
+	(*error_table).table[error_table->length - 1].line_number = line;
 
 	return new_error; /* if no error was encountered, the function shall return the error it was requested to (and successfully) added */
 }
 
-errorType is_label_def_valid( const char *label, const tables_host host ){
+errorType is_label_def_valid( char *label, const tables_host host ){
 	int i, char_temp;
 
 	macro_table macros; /*more convenient access to the macro table*/
@@ -33,12 +33,12 @@ errorType is_label_def_valid( const char *label, const tables_host host ){
 	if(is_language_word(label)) return ILLEGAL_LABEL_NAME;
 
 	/* if the label name overlaps with a macro name, it is illegal */
-	for(i = 0; i<SIZE_OF_ARR(macros); i++)
+	for(i = 0; i<macros.length; i++)
 		if(strcmp(label, macros.table[i].name) == 0) 
 			return ILLEGAL_LABEL_NAME;
 
 	/* if a label by the same name has already been declared, it is illegal */
-	for(i = 0; i<SIZE_OF_ARR(other_labels); i++)
+	for(i = 0; i<other_labels.length; i++)
 		if(strcmp(label, other_labels.table[i].name) == 0) 
 			return MULTIPLE_DEF_NOT_ALLOWED;
 

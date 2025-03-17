@@ -4,6 +4,7 @@
 #define OUTPUT_FILES_CREATION
 
 #include <stdio.h>
+#include <string.h>
 
 #include "tables.h"
 

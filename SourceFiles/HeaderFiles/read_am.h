@@ -10,6 +10,10 @@
 #include "words.h"
 #include "utilities.h"
 #include "analyse_op.h"
+#include "error_handling.h"
+#include "label_handling.h"
+#include "table_functions.h"
+#include "word_functions.h"
 
 /**
  * Function responsible for general translation process.
