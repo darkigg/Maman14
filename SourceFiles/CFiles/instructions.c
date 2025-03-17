@@ -1,38 +1,43 @@
-#include "../Header Files/instructions.h"
-/*this file includes definitions for functions handling and executing specific instructions encountered in the code*/
+#include "../HeaderFiles/read_am.h"
 
+/*THIS FUNCTION DOES NOT OPERATE PROPERLY, NO WORDS ARE ADDED*/
 errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
-	char *segment; /*the currently iterated over token*/
+	char segment[MAXLINE]; /*the currently iterated over token*/
 	errorType error_temp = NONE;
+	int i, line_len;
+	
+	printf("reached data with %s\n", line);
 	
 	/* rids line of potential label declarations and the instruction call itself */
 	line = get_arg_list(line);
-
+	printf("args: %s\n", line);
 	/*get_arg_list returns NULL if an argument list was not found; .data must receive at least some arguments and so an error must be reported*/
-	if(line == NULL) error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
-	return error_temp;
+	if(line == NULL) {
+		error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
+		return error_temp;
+	}
+	printf("data continued\n");
 
-	if(line[0] == ',') error_temp = add_error(&(host->errors), ILLEGAL_COMMA, linecnt); /*there's a comma at the beginning of the argument list, meaning there's a comma immediately following the instruction*/
-	return error_temp;
-
+	if(line[0] == ',') {
+		error_temp = add_error(&(host->errors), ILLEGAL_COMMA, linecnt); /*there's a comma at the beginning of the argument list, meaning there's a comma immediately following the instruction*/
+		return error_temp;
+	}
+	
+	line_len = strlen(line);
 	/* split it up by commas and scan */
-	if(error_temp == NONE) for(segment  = strtok(line, ','); segment; segment = strtok(NULL, ',')){
+	if(error_temp == NONE) for(i = get_token(segment, line, ',', 0, line_len); i>=0; i = get_token(segment, line, ',', i, line_len)){
 		int value;
-
+		
 		if(is_comma_missing(segment)){/*if a comma is missing, add a missing comma error and ensure it succeeded*/
 			error_temp = add_error(&(host->errors), MISSING_COMMA, linecnt);
 			return error_temp;
-
-			break; /*there is an error in the line, continuing to read it will be meaningless*/
 		}
 
 		else if(!is_string_numeric(segment)){/*if the argument is not numeric, space cannot be allocated to it*/
 			error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
 			return error_temp;
-
-			break; /*again, there is an error in the line, continuing to read it will be meaningless*/
 		}
-
+		printf("valid argument spotted\n");
 		value = atoi(segment); /*convert the argument to an integer*/ 
 		error_temp = add_word( &(host->data_words), value, (*DC)++, False ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
 		ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)

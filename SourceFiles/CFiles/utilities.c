@@ -1,5 +1,5 @@
-#include "../Header Files/utilities.h"
-/*this file includes definitions for functions which are used throughout the assembler and are not useful only for specific sections, nor do they have much in relation with other functions.*/
+#include "../HeaderFiles/utilities.h"
+/*this file includes definitions for functions which do not require any special types defined in the program (with the exception of constants or boolean)*/
 
 void remove_spaces(char *str){
 
@@ -39,7 +39,7 @@ boolean is_string_numeric(char *str){
 	boolean was_digit_encountered = False; /*whether or not the function already encountered a digit (necessary in order to ensure the function won't consider a standalone sign numeric)*/
 	boolean was_end_of_num_encountered = False; /*whether or not the function already encountered a white character after a number*/
 
-	for(; str != '\0'; str++){
+	for(; (*str) != '\0'; str++){
 		if( IS_WHITESPACE((*str)) && was_sign_encountered){
 			was_end_of_num_encountered = True;
 			if(!was_digit_encountered) return False; /* there was, then, a standalone sign, which does not represented a number and is therefore illegal.*/
@@ -63,7 +63,7 @@ boolean is_language_word(char *str){
 	char *words[] = LANGUAGE_WORDS, *curr;
 
 	/* array going over all words used by the language, comparing each to str */
-	for(i = 0, curr = words[i]; i < SIZE_OF_ARR(words); curr = str[++i]){
+	for(i = 0, curr = words[i]; i < SIZE_OF_ARR(words); curr = words[++i]){
 		
 		/* if str is the same as the current language word, return True */
 		if(strcmp(curr, str) == 0) return True;
@@ -76,7 +76,7 @@ boolean is_language_word(char *str){
 boolean is_string_empty(char *str){
 
 	/* a loop iterating over the entirety of str, checking for each character whether it is white or not.*/
-	for(;str != '\0'; str++){
+	for(; (*str) != '\0'; str++){
 		if( !IS_WHITESPACE(*str) )
 			return False; /*the string is not void of meaningful content*/
 	}
@@ -84,8 +84,42 @@ boolean is_string_empty(char *str){
 	return True; /* the string is indeed void of meaningful content */
 }
 
-void end_prog(tables_host *tables){
-	free_tables_host(tables);
+char *get_arg_list(char *line){
+	int i, char_temp, prev_char,prev_non_white_char = '\0' /*prev_char stores the last non_white character*/;
+
+	for(i = 0, char_temp = line[i];  char_temp != '\0'; prev_char = char_temp, char_temp = line[++i]){
+		
+		if(char_temp != ' ' && prev_char == ' ' && prev_non_white_char != ':' && prev_non_white_char){
+			
+			break; /*if the above conditions are met, we will have found the supposed beginning of the argument list, as it is the first block of characters seperated by space from something that is not a label declaration*/
+		}
+			
+		prev_non_white_char = (IS_WHITESPACE(char_temp))? prev_non_white_char : char_temp;
+	}
 	
-	exit(1); /* 1 is used because the program did not finish execution smoothly */
+	return (char_temp == '\0')? NULL : line + i; /*if char is at index i within line and char is at the beginning of the argument list, line + i will point to that index; although if char_temp is the end of the line the function was deemed to return NULL*/
+}
+
+boolean is_comma_missing(char* token){
+	boolean finished_reading_arg = False; /*did the function already encounter (within the token) a white space character preceeded by a non-white one?*/
+
+	for(token++ /*no need to read the first char as the one before it was undefined*/; *token != '\0'; token++){
+		if(IS_WHITESPACE((*token)) && !IS_WHITESPACE( (*(token - 1)) )) finished_reading_arg = True; /* if token is a white character and the previous character is not white, it is the end of an argument*/
+		else if(!IS_WHITESPACE((*token)) && finished_reading_arg) return True; /*there is a non-white character despite the end of the argument having already been encountered*/
+	}
+
+	return False; /*no case of missing comma was encountered.*/
+}
+
+int get_token(char* token_dest, char* token_src, const char delimeter, const int token_ind, int src_len){
+	char *char_temp;
+
+	if(token_ind >= src_len) return -1;
+
+	for(char_temp = token_src + token_ind; ((*char_temp) != delimeter && char_temp != token_dest) && (*char_temp) != '\0'; char_temp++, token_dest++)
+		(*token_dest) = (*char_temp);  
+	
+	(*token_dest) = '\0';
+
+	return char_temp - token_src + 1;
 }
