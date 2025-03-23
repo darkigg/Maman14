@@ -13,12 +13,12 @@
 
 /**
  * Adds an error to a given error table.
- * @param error_table pointer to the error table to which an error will be added.
+ * @param error_tab pointer to the error table to which an error will be added.
  * @param new_error the type of the error to add.
  * @param line the line at which the new error was encountered.
  * @return an error encountered during the table expansion process; if none were, it will return the error that was added.
  */
-errorType add_error(error_table *error_table, errorType new_error, int line); 
+errorType add_error(error_table *error_tab, errorType new_error, int line); 
 
 /**
  * Verifies validity of a label name, emitting an error if it is not.
@@ -41,6 +41,6 @@ void end_prog(tables_host *tables);
  * @param filename the name of the file within which all the errors were encountered.
  * @return the amount of errors printed.
  */
-int print_err(error_table *error_table, char *filename);
+int print_err(const error_table *error_table, char *filename);
 
 #endif

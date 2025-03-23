@@ -4,6 +4,7 @@
 #define TABLE_FUNCTIONS
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "tables.h"
 

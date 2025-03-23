@@ -10,7 +10,7 @@
 /* checks whether a char x is a letter */
 #define IS_LETTER(x) ( ('a' <= x && x <= 'z') || ('A' <= x && x <= 'Z') )
 
-#define IS_WHITESPACE(x) ( x == ' ' || x == '\t' || x == '\n')
+#define IS_WHITESPACE(x) ( x == ' ' || x == '\t' || x == '\n' || x == '\r' || x == '\v' || x == '\f')
 
 #define SIZE_OF_ARR(x) ( sizeof(x)/sizeof(x[0]) )
 
@@ -25,10 +25,17 @@ void remove_spaces(char *str);
  * @param source the original string from which to copy.
  * @param destination the string to copy the sliced part of source to.
  * @param start the start index of the slice.
- * @param end the end index of the slice.
+ * @param end the end index of the slice, excluded from the copy.
  * @return whether or not the slicing the succeeded.
  */
 boolean string_slicencpy(const char* source, char* destination, int start, int end);
+
+/**
+ * For a given string, checks whether it contains any not-white characters.
+ * @param str the string to check.
+ * @return True if the str comprises of white characters alone, false otherwise.
+ */
+boolean is_str_empty(char* str);
 
 /**
  * Finds out whether str is a word already used by the language or not.

@@ -23,12 +23,14 @@ errorType add_word(word_table *tab, const int val, const int address, boolean is
 int create_regular_word(int value, boolean A, boolean R, boolean E){
 	int result = 0; /* the ultimate result of the process*/
 
+	printf("Val:%d, A:%d, R:%d, E:%d\n", value, A, R, E);
+
 	result+= E; /* the first bit to the right is the E */
 	result+= R<<1; /* the 2nd bit to the right is the R, so it should be moved by 1 left */
 	result+= A<<2; /* the 3rd bit to the right is the A, so it should be moved by 2 left */
 	result+= value<<3; /* the rest of the bits (out of the 24 of a word) to the left of these store the value */
 
-	if(value > MAX_ADDRESS) /*MAX_ADDRESS is 2^21, which is also the max value which can be stored by a regular word considering 3 of the 24 bits are used for something else.*/
+	if(value > MAX_ADDRESS) /* MAX_ADDRESS is 2^21, which is also the max value which can be stored by a regular word considering 3 of the 24 bits are used for something else. */
 		result = ~0; /* an illegal value, which will definetly lead to an error later when an attempt to add the word is added to the table */
 
 	return result;
@@ -63,23 +65,26 @@ int startword_to_value(startword word){
 	return result;
 }
 
-errorType append_data_words_table(word_table *tabA, const word_table tabB, int IC){
+errorType append_data_words_table(word_table *tabA, word_table *tabB, int IC){
 	struct word_table_line *line_temp_A, *line_temp_B; /* variables used for iteration in the loop copying the lines of tabB into the newly allocated segments of tabB */
 
-	if(tabB.length == 0) return NONE; /*no need to do anything if the length of tabB is 0; there is nothing to append*/
+	if(tabB->length == 0) return NONE; /*no need to do anything if the length of tabB is 0; there is nothing to append*/
 
 	/* EXTEND_TABLE() is not used, as it is more efficient to extend the table by the required length in a single go rather than making multiple extensions of a single line; EXTEND_TABLE() can only add 1 line to the table at a time. */
-	tabA->table = (struct word_table_line *) realloc(tabA->table, (tabA->length + tabB.length) * sizeof(tabB.table[0]));
+	tabA->table = (struct word_table_line *) realloc(tabA->table, (tabA->length + tabB->length) * sizeof(tabB->table[0]));
 	if( tabA->table == NULL ) return UNABLE_TO_ALLOCATE_MEMORY; /* as the dynamic allocation failed */
 
 	/* a loop iterating over all lines in tabB, copying their values into the matchingly allocated lines in tabA. */
-	for(line_temp_A = (tabA->table) + (tabA->length), line_temp_B = tabB.table; line_temp_B < (tabB.table + tabB.length); line_temp_A++, line_temp_B++){ /***** FIX THIS DAMN LINE THIS LOOP NEVER FUCKING ENDSSSSSSSSSSSSS */
+	for(line_temp_A = (tabA->table) + (tabA->length), line_temp_B = tabB->table; line_temp_B < (tabB->table + tabB->length); line_temp_A++, line_temp_B++){ /***** FIX THIS DAMN LINE THIS LOOP NEVER FUCKING ENDSSSSSSSSSSSSS */
 
 		*line_temp_A = *line_temp_B;
 		(*line_temp_A).address+=IC; /*add the IC in order to set the address of the word to the correct address*/
 	}
 
-	tabA->length += tabB.length;
+	tabA->length += tabB->length;
+	free(tabB->table);
+	tabB->valid = False;
 
+	printf("What's up people?????????????????????????????? %d\n",tabA->length);
 	return NONE; /* The only error which could have been encountered in this function is a failed dynamic allocation. If the program made it thus far, it was not encountered. */
 }

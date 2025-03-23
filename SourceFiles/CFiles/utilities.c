@@ -34,6 +34,14 @@ boolean string_slicencpy(const char* source, char* destination, int start, int e
 
 }
 
+boolean is_str_empty(char* str){
+	/* a loop iterating over all characters in str,*/
+	for(; (*str)!='\0'; str++)
+		if(!IS_WHITESPACE(*str))
+			return False; /*...returning that str is not empty if a non-white character was found.*/
+	return True; /*but if non such was, str is deemed empty and so so is reported to the caller.*/
+}
+
 boolean is_string_numeric(char *str){
 	boolean was_sign_encountered = False; /*whether or not the function already encountered a number sign mark (either + or -) or the start of a number*/
 	boolean was_digit_encountered = False; /*whether or not the function already encountered a digit (necessary in order to ensure the function won't consider a standalone sign numeric)*/

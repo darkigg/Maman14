@@ -3,6 +3,7 @@
 #ifndef CONSTS
 #define CONSTS
 
+#define MAX_MACRO 31 /*max length of a macro name*/
 
 #define FUNCOUNT 16 /*amount of operations*/
 
@@ -17,6 +18,8 @@
 #define MAX_ADDRESS 2097151 /* the maximal number which can be represented with 21 bits*/
 
 #define WORD_LIMIT 16777216 /* the maximal number which can be represented with 24 bits*/
+
+#define WHITESPACES " \t\n" 
 
 /*an array of all operation names, ordered by their appearance in the below enum operationType*/
 #define FUNCTEXT {"mov", "cmp", "add", "sub", "lea", "clr", "not", "inc", "dec", "jmp", "bne", "jsr", "red", "prn", "rts", "stop"}
@@ -54,10 +57,15 @@ typedef enum{
 } boolean;
 
 enum address_method{
-	IMMEDIATE_ADDRESS,
-	DIRECT_ADDRESS,
-	VARIABLE_ADDRESS,
-	DIRECT_REGISTER_ADDRESS
+	IMMEDIATE_ADDRESS = 0,
+	DIRECT_ADDRESS = 1,
+	VARIABLE_ADDRESS = 2,
+	DIRECT_REGISTER_ADDRESS = 3
+};
+
+enum argument_type{
+	ORIGIN,
+	DESTINATION
 };
 
 typedef enum{
@@ -101,6 +109,8 @@ typedef enum{
 	CANNOT_GET_EXTERN_LABEL_ADDRESS,
 	VALUE_TOO_BIG,
 	NO_AVAILABLE_ADDRESS,
+	UNABLE_TO_OPEN_FILE,
+	INVALID_MACRO_NAME,
 
 	UNABLE_TO_ALLOCATE_MEMORY, /*used when a dynamic allocation fails.*/
 	

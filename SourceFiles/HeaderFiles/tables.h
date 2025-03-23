@@ -3,15 +3,16 @@
 #ifndef TABLES
 #define TABLES
 
-#include "stdlib.h"
+#include <stdlib.h>
+#include <stdio.h> /*delete this*/
 
 #include "words.h"
 #include "constants.h"
 
-#define EXTEND_TABLE(tab, type) /*expects 'tab' to be one of the table types, and to be called only when errorType is the return type. type is the type of a single table line. */ \
-	(tab).table = (type *) realloc( (tab).table, ((tab).length + 1) * sizeof((tab).table[0]) );\
-	if((tab).table == NULL) return UNABLE_TO_ALLOCATE_MEMORY;\
-	(tab).length++
+/*this macro is prone to errors*/
+#define EXTEND_TABLE(tab, type) /*expects 'tab' to be one of the table types, and to be called only when errorType is the return type. type is the type of a single table line.*/ \
+	(tab).table = (type *) realloc( (tab).table, (++(tab.length)) * sizeof((tab).table[0]) );\
+	if((tab).table == NULL) {return UNABLE_TO_ALLOCATE_MEMORY; (tab).valid = False; }
 
 /**
  * Table type capable of containing all assembler errors encountered and the line at which they appear.
@@ -23,6 +24,7 @@ struct error_table_line{
 typedef struct{
 	struct error_table_line *table;
 	unsigned int length;
+	boolean valid; /*stores whether or not the table contained in the struct can be accessed; if it contains valid data*/
 } error_table;
 
 /**
@@ -31,12 +33,14 @@ typedef struct{
  */
 struct label_arguments_table_line{
 	unsigned int line;
-	unsigned int word_ind; /* will be negative if there is no word to infer, essentially in a .entry instruction */
+	unsigned int word_ind; /*the index of the word where the data of the argument is to be stored within the table of words.*/
+	unsigned int entry : 1; /*entry specifier*/
 	char arg[MAXLABEL + 1]; /*an argument in this table contains a label name and a potential & preceeding it; therefore the argument will not be longer than the max length of a label name plus 1 additional character.*/
 };
 typedef struct{
 	struct label_arguments_table_line *table;
 	unsigned int length;
+	boolean valid; /*stores whether or not the table contained in the struct can be accessed; if it contains valid data*/
 } label_arguments_table;
 
 /** 
@@ -49,6 +53,7 @@ struct macro_table_line{
 typedef struct {
 	struct macro_table_line *table;
 	unsigned int length;
+	boolean valid; /*stores whether or not the table contained in the struct can be accessed; if it contains valid data*/
 } macro_table;
 
 /**
@@ -63,6 +68,7 @@ struct word_table_line{
 typedef struct{
 	struct word_table_line *table;
 	unsigned int length;
+	boolean valid; /*stores whether or not the table contained in the struct can be accessed; if it contains valid data*/
 } word_table;
 
 /**
@@ -83,6 +89,7 @@ struct label_table_line{
 typedef struct {
 	struct label_table_line * table;
 	unsigned int length;
+	boolean valid; /*stores whether or not the table contained in the struct can be accessed; if it contains valid data*/
 } label_table;
 
 /**
@@ -90,7 +97,6 @@ typedef struct {
  * Useful for access to tables through functions requiring multiple tables, and for easy allocation and deallocation of all dynamically allocated memory components in the program.
  */
 typedef struct tables{
-
 	macro_table macros; /* table of macros */
 	label_table labels; /* table of labels */
 	word_table words; /* table of all words from the current file */
