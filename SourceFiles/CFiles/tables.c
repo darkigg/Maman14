@@ -16,14 +16,25 @@ void initiate_tables_host(tables_host *host){
 	host->data_words.length = 0;
 	host->macros.length = 0;
 	host->lab_args.length = 0;
+
+	host->errors.valid = True;
+	host->labels.valid = True;
+	host->words.valid = True;
+	host->data_words.valid = True;
+	host->macros.valid = True;
+	host->lab_args.valid = True;
 }
 
 /*simply frees all tables using free()*/
 void free_tables_host(tables_host *host){
-	free(host->errors.table);
-	free(host->labels.table);
-	free(host->words.table);
-	free(host->data_words.table);
-	free(host->macros.table);
-	free(host->lab_args.table);
+	struct label_table_line *ptr;
+	for(ptr = host->labels.table; ptr < host->labels.length + host->labels.table; ptr++) printf("valliue%d\n", ptr->value);
+
+	if(host->errors.valid) free(host->errors.table);
+	printf("gotcha\n");
+	if(host->labels.valid) free(host->labels.table);
+	if(host->words.valid) free(host->words.table);
+	if(host->data_words.valid)free(host->data_words.table);
+	if(host->macros.valid) free(host->macros.table);
+	if(host->lab_args.valid) free(host->lab_args.table);
 }

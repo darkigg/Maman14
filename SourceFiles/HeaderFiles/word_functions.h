@@ -3,6 +3,8 @@
 #ifndef WORDS_FUNCTIONS
 #define WORDS_FUNCTIONS
 
+#include <stdio.h> /*remove this*/
+
 #include "constants.h"
 #include "tables.h"
 #include "table_functions.h"
@@ -48,6 +50,6 @@ int startword_to_value(startword word);
  * @param IC the ultimate IC value.
  * @return the most recently encountered error during the function's execution.
  */
-errorType append_data_words_table(word_table *tabA, const word_table tabB, int IC);
+errorType append_data_words_table(word_table *tabA, word_table *tabB, int IC);
 
 #endif

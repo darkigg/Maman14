@@ -8,6 +8,11 @@ operationType detect_op(char *op_text){
 	char *opNames[] = FUNCTEXT;
 
 	int i;
+	char *char_temp;
+
+	/*in order to avoid problems of whitespaces on the edges, the program will remove whitespaces from the edges of the token (either from the beginning until a non-white character is encountered or from the end until the same occurance)*/
+	for(; IS_WHITESPACE(*op_text); op_text++);
+	for(char_temp = op_text + strlen(op_text)-1; IS_WHITESPACE(*char_temp); char_temp--) *char_temp = '\0';
 
 	/*go over all operations, check for each one whether or not it is the one found within op_text*/
 	for(i = 0; i<FUNCOUNT; i++){
@@ -47,24 +52,46 @@ int op_arg_count(operationType type){
 	}
 }
 
-boolean is_address_method_valid(int opcode, int address_method){
+/******** FIX THIS DAMN FUNCTIONMMMMM */
+boolean is_address_method_valid(int opcode, int address_method, int arg_type){
 	/* this function operates according to the table present in page 44 of the task's description, in which the legal addressing methods for each operation are specified.*/
-	switch(address_method){
-		case 0:
-		if(opcode == 1 || opcode == 13) return True;
-		else return False;
+	switch(arg_type)
+		case DESTINATION:{
+			switch(address_method){
+				case IMMEDIATE_ADDRESS:
+				if(opcode == 1 || opcode == 13) return True;
+				else return False;
 
-		case 1:
-		if(opcode != 14 && opcode != 15) return True;
-		else return False;
+				case DIRECT_ADDRESS:
+				if(opcode != 14 && opcode != 15) return True;
+				else return False;
 
-		case 2:
-		if( opcode == 9 ) return True;
-		else return False;
+				case VARIABLE_ADDRESS:
+				if( opcode == 9 ) return True;
+				else return False;
 
-		case 3:
-		if( opcode == 2 || opcode == 4 || opcode == 5 || opcode == 12 || opcode == 13 ) return True;
-		else return False;
+				case DIRECT_REGISTER_ADDRESS:
+				if( opcode != 9 && opcode != 14 && opcode != 15 ) return True;
+				else return False;
+
+				default: return False; /*invalid*/
+			}
+		case ORIGIN:{
+			switch(address_method){
+				case IMMEDIATE_ADDRESS:
+				case DIRECT_REGISTER_ADDRESS:
+				if(opcode >= 0 && opcode <=2) return True;
+				else return False;
+
+				case DIRECT_ADDRESS:
+				if(opcode >= 0 && opcode <=4) return True;
+				else return False;
+
+				case VARIABLE_ADDRESS: return False;
+
+				default: return False; /*invalid*/
+			}
+		}
 
 		default: return False; /*invalid*/
 	}

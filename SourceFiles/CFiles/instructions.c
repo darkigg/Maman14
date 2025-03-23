@@ -82,6 +82,10 @@ errorType string_inst(tables_host *host, char *line, int *DC, const int linecnt)
 			return error_temp;
 		}
 
+	/*as a final touch, an end-of-string character must be allocated:*/
+	error_temp = add_word( &(host->data_words), '\0', (*DC)++, False);
+	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+
 	return error_temp;
 }
 
@@ -100,8 +104,9 @@ errorType extern_inst(tables_host *host, char *line, const int linecnt){
 	}
 
 	/* a loop copying the suspected label name into the label string */
-	for(char_ptr_temp = line; *char_ptr_temp != ' ' && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
+	for(char_ptr_temp = line; *char_ptr_temp != '\0' && !IS_WHITESPACE(*char_ptr_temp) && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
 		label[char_ptr_temp-line] = *char_ptr_temp; /*char_ptr_temp-line is the index of the char pointed to by char_ptr_temp within the line string*/
+	label[char_ptr_temp-line] = '\0';
 
 	/* checks for additional arguments post label name, and potentially reports an error accordingly */
 	for(; *char_ptr_temp != '\0'; char_ptr_temp++)
@@ -129,28 +134,32 @@ errorType firstphase_entry_inst(tables_host *host, char *line, const int linecnt
 	char label[MAXLABEL], /*stores the name of the label referenced in the instruction*/
 		*char_ptr_temp; 
 
+	
 	/* rids line of potential label declarations and the instruction call itself, bringing it to the beginning of the label name */
 	line = get_arg_list(line);
 
 	/*get_arg_list returns NULL if an argument list was not found; .entry must receive 1 argument and so an error must be reported*/
 	if(line == NULL) { 
 		error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 		return error_temp;
 	}
 
 	/* a loop copying the suspected label name into the label string */
-	for(char_ptr_temp = line; *char_ptr_temp != ' ' && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
+	for(char_ptr_temp = line; *char_ptr_temp != '\0' && !IS_WHITESPACE(*char_ptr_temp) && (char_ptr_temp - line) <= MAXLABEL; char_ptr_temp++)
 		label[char_ptr_temp-line] = *char_ptr_temp; /*char_ptr_temp-line is the index of the char pointed to by char_ptr_temp within the line string*/
+	label[char_ptr_temp-line] = '\0';
 
 	/* checks for additional arguments post label name, and potentially reports an error accordingly */
 	for(; *char_ptr_temp != '\0'; char_ptr_temp++)
 		if( !(IS_WHITESPACE((*char_ptr_temp))) ){
 			error_temp = add_error(&(host->errors), EXTRANEOUS_TEXT, linecnt);
+			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			return error_temp;
 		}
 
 	/* adds the argument to the label arguments table, so that it will be inferred during the 2nd assembler phase */
-	error_temp = add_label_argument( &(host->lab_args), linecnt, -1, label);
+	error_temp = add_label_argument( &(host->lab_args), linecnt, 0, True, label);
 	
 	/* return either NONE (the initial value) or the most recently encountered error */
 	return error_temp;

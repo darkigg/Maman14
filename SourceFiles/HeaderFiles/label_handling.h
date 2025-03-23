@@ -16,11 +16,12 @@
  * A function for adding arguments dependant on labels to a label_arguments_table.
  * @param lab_args a pointer to the table of label arguments, to which a word will be added.
  * @param line the line at which the argument appears within the code.
- * @param ind the index of the word to which the 2nd passage should write (if there is no such, enter a negative value).
+ * @param ind the index of the word where the value of the argument should be stored.
+ * @param entry whether or not the argument is of an entry instruction.
  * @param arg a string containing the argument itself to be scanned.
  * @return the most recently encountered error during the function's execution.
  */
-errorType add_label_argument(label_arguments_table *lab_args, int line, int ind, char *arg);
+errorType add_label_argument(label_arguments_table *lab_args, int line, int ind, boolean entry, char *arg);
 
 /**
  * This function, given the first token of a line seperated by whitespaces, seeks a label within that line.
@@ -30,7 +31,7 @@ errorType add_label_argument(label_arguments_table *lab_args, int line, int ind,
  * @param name pointer to a string to which the spotted (if was) label's name shall be written.
  * @return the most recent error encountered by the function.
  */
-errorType scan_for_label(const char *segment, tables_host *host, int line_n, char *name);
+errorType scan_for_label(char *segment, tables_host *host, int line_n, char *name);
 
 /**
  * adds a label to a label table, with a name, address and identifiers.
@@ -51,5 +52,12 @@ errorType add_label(label_table *labels, char name[MAXLABEL], int address, boole
  * @return a pointer to the line of the table at which the label and all of its data is stored.
  */
 struct label_table_line* get_label(label_table *labels, char *label_name);
+
+/**
+ * This function iterates the label table and adds IC to every label on the list tagged data.
+ * @param labels the table of labels.
+ * @param IC the amount to add to the value of every data label.
+ */
+void update_data_labels(label_table labels, int IC);
 
 #endif

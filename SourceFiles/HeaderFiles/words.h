@@ -9,7 +9,7 @@
 		/*if add_word returned any other error (and it could have), that error shall be reported in the usual procedure.*/\
 		eTemp = add_error( &(tHost->errors), NO_AVAILABLE_ADDRESS, lCount);\
 		if(eTemp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(tHost);\
-		else return eTemp;\
+		return eTemp;\
 	}
 
 typedef struct as_first_word{
@@ -25,17 +25,10 @@ typedef struct as_first_word{
 	unsigned int E : 1;
 
 } startword; /*startword is a struct used to represent the first word of an instruction*/
- 
-typedef struct as_regular_word{
-	unsigned int A : 1;
-	unsigned int R : 1;
-	unsigned int E : 1;
-	int value : 21;
-} default_word; /*default_word is a struct used to represent arguments provided to a code line*/
 
 /* all words are eventually converted to this one, as a word is a mere sequence of 24 bits*/
 typedef struct as_word{
-	int value : 24;
+	unsigned int value : 24;
 } assembly_word;
 
 #endif

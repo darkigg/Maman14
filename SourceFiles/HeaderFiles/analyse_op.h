@@ -7,6 +7,7 @@
 
 #include "constants.h"
 #include "tables.h"
+#include "utilities.h"
 
 /**
  * This function, given a potentially viable operation, detects the function (if it is valid).
@@ -22,12 +23,14 @@ operationType detect_op(char *op_text);
 int op_arg_count(operationType type);
 
 /**
- * This function, given an operation's opcode and the address method of which an attempted usage is made, will check whether or not the operation can accept that address method.
+ * This function, given an operation's opcode and the address method of which an attempted usage is made, will check whether or not the operation can accept that address method. 
+ * The function expects valid values and error handling is not performed within it.
  * @param opcode the operation's opcode.
  * @param address_method the attempted addressing method.
+ * @param arg_type the "index" of the argument among all the arguments the function receives.
  * @return whether or not the address method is acceptable for the operation.
  */
-boolean is_address_method_valid(int opcode, int address_method);
+boolean is_address_method_valid(int opcode, int address_method, int arg_type);
 
 /**
  * Given an operation type, the function returns the corresponding opcode matching the operation type.
