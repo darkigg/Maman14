@@ -1,0 +1,4 @@
+LIME: cmp r1, #4
+.string " fas rr"
+stop
+add r3, LIME
