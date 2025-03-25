@@ -59,19 +59,15 @@ int main(int argc, char *argv[]){
 		
 		strcpy(file_name, argv[argc]);
 
-		printf("tables consensus report:\n \tMACROS -> len:%d, validity:%d, first item:%d\n \tLABELS -> len:%d, validity:%d, first item:%d\n \tWORDS -> len:%d, validity:%d, first item:%d\n \tDATA_WORDS -> len:%d, validity:%d, first item:%d\n \tERRORS -> len:%d, validity:%d, first item:%d\n \tLAB_ARGS -> len:%d, validity:%d, first item:%d\n",
-		tables.macros.length, tables.macros.valid, 0, tables.labels.length, tables.labels.valid, tables.labels.table->value, tables.words.length, tables.words.valid, tables.words.table->word.value, tables.data_words.length, tables.data_words.valid, tables.data_words.table->address, tables.errors.length, tables.errors.valid, tables.errors.table->error, tables.lab_args.length, tables.lab_args.valid, tables.lab_args.table->line);
-
 		/* create the output files */
 		if(!print_err(&(tables.errors), file_name)){ /*print_err will return 0 if no errors were printed, meaning none were encountered, meaning the output files shall be created; therefore they will be.*/
-			fprintf(stdout, "\nend\n");
 			create_obj_file(tables.words, ICF, DCF, file_name);
+			create_ent_files(tables.labels, file_name);
+			create_ext_files(tables.lab_args, file_name);
 		}
 		
-		printf("any way the wind blows %d\n", tables.errors.length);
 		/* unload of tables from the heap */
 		free_tables_host(&tables);
-		printf("end of file\n");
 
 		fclose(assembly_file);
 	}

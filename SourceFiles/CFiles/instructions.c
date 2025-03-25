@@ -6,17 +6,14 @@ errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 	errorType error_temp = NONE;
 	int i, line_len;
 	
-	printf("reached data with %s\n", line);
-	
 	/* rids line of potential label declarations and the instruction call itself */
 	line = get_arg_list(line);
-	printf("args: %s\n", line);
+
 	/*get_arg_list returns NULL if an argument list was not found; .data must receive at least some arguments and so an error must be reported*/
 	if(line == NULL) {
 		error_temp = add_error(&(host->errors), NOT_ENOUGH_ARGUMENTS, linecnt);
 		return error_temp;
 	}
-	printf("data continued\n");
 
 	if(line[0] == ',') {
 		error_temp = add_error(&(host->errors), ILLEGAL_COMMA, linecnt); /*there's a comma at the beginning of the argument list, meaning there's a comma immediately following the instruction*/
@@ -37,7 +34,7 @@ errorType data_inst(tables_host *host, char *line, int *DC, const int linecnt){
 			error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
 			return error_temp;
 		}
-		printf("valid argument spotted\n");
+
 		value = atoi(segment); /*convert the argument to an integer*/ 
 		error_temp = add_word( &(host->data_words), value, (*DC)++, False ); /*adds the argument to the table of words; increments the value of DC as a data word has been encountered. */
 		ADD_WORD_ERROR_HANDLING(host, error_temp, linecnt)

@@ -1,4 +1,4 @@
-/*This header includes general macros and functions for handling the different parts of the program, which do not depend on any new type defined in the program*/
+/*This header includes general macros and functions for handling the different parts of the program, which do not depend on any new type defined in the program nor do they require any functions declared in other headers of the program*/
 
 #ifndef UTILITIES
 #define UTILITIES
@@ -72,6 +72,13 @@ char *get_arg_list(char *line);
  * @return whether or not there is more than a single argument in the token (e.g. a non white character spotted after the end of the argument).
  */
 boolean is_comma_missing(char* token);
+
+/**
+ * Checks whether a provided command provocation includes illegal commas, and removes them.
+ * @param command the string including the segment of the line where the command is supposed to appear.
+ * @return whether or not an illegal comma was spotted.
+ */
+boolean does_include_illegal_comma(char *command);
 
 /**
  * Given a string of text, a destination and an index, this function will extract the first token from the character token from the string of text into the destination.

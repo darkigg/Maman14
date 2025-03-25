@@ -23,8 +23,6 @@ errorType add_word(word_table *tab, const int val, const int address, boolean is
 int create_regular_word(int value, boolean A, boolean R, boolean E){
 	int result = 0; /* the ultimate result of the process*/
 
-	printf("Val:%d, A:%d, R:%d, E:%d\n", value, A, R, E);
-
 	result+= E; /* the first bit to the right is the E */
 	result+= R<<1; /* the 2nd bit to the right is the R, so it should be moved by 1 left */
 	result+= A<<2; /* the 3rd bit to the right is the A, so it should be moved by 2 left */
@@ -85,6 +83,5 @@ errorType append_data_words_table(word_table *tabA, word_table *tabB, int IC){
 	free(tabB->table);
 	tabB->valid = False;
 
-	printf("What's up people?????????????????????????????? %d\n",tabA->length);
 	return NONE; /* The only error which could have been encountered in this function is a failed dynamic allocation. If the program made it thus far, it was not encountered. */
 }

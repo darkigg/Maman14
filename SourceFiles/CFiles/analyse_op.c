@@ -12,7 +12,8 @@ operationType detect_op(char *op_text){
 
 	/*in order to avoid problems of whitespaces on the edges, the program will remove whitespaces from the edges of the token (either from the beginning until a non-white character is encountered or from the end until the same occurance)*/
 	for(; IS_WHITESPACE(*op_text); op_text++);
-	for(char_temp = op_text + strlen(op_text)-1; IS_WHITESPACE(*char_temp); char_temp--) *char_temp = '\0';
+	for(char_temp = op_text + strlen(op_text)-1; IS_WHITESPACE(*char_temp); char_temp--)
+		*char_temp = '\0';
 
 	/*go over all operations, check for each one whether or not it is the one found within op_text*/
 	for(i = 0; i<FUNCOUNT; i++){

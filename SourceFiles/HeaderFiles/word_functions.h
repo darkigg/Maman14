@@ -3,8 +3,6 @@
 #ifndef WORDS_FUNCTIONS
 #define WORDS_FUNCTIONS
 
-#include <stdio.h> /*remove this*/
-
 #include "constants.h"
 #include "tables.h"
 #include "table_functions.h"

@@ -4,7 +4,6 @@
 #define TABLES
 
 #include <stdlib.h>
-#include <stdio.h> /*delete this*/
 
 #include "words.h"
 #include "constants.h"
@@ -35,6 +34,8 @@ struct label_arguments_table_line{
 	unsigned int line;
 	unsigned int word_ind; /*the index of the word where the data of the argument is to be stored within the table of words.*/
 	unsigned int entry : 1; /*entry specifier*/
+	unsigned int external : 1;
+	unsigned int address : 21;
 	char arg[MAXLABEL + 1]; /*an argument in this table contains a label name and a potential & preceeding it; therefore the argument will not be longer than the max length of a label name plus 1 additional character.*/
 };
 typedef struct{
