@@ -37,6 +37,8 @@ errorType add_label_argument(label_arguments_table *lab_args, int line, int ind,
 	lab_args->table[lab_args->length-1].line = line;
 	lab_args->table[lab_args->length-1].word_ind = ind;
 	lab_args->table[lab_args->length-1].entry = entry;
+	lab_args->table[lab_args->length-1].external = 0; 
+	lab_args->table[lab_args->length-1].address = 0;
 	strcpy((*lab_args).table[lab_args->length-1].arg, arg);
 
 	return NONE;
@@ -72,7 +74,7 @@ struct label_table_line* get_label(label_table *labels, char *label_name){
 	if(label_name[0] == '&') label_name++; /*in order to ignore the potential & prefix when comparing names*/
 
 	for(i = 0; i<labels->length; i++){
-		if(strcmp(labels->table[i].name, label_name) == 0){printf("bippidy bup |%s|\n", label_name);
+		if(strcmp(labels->table[i].name, label_name) == 0){
 			return (labels->table) + i;
 		}
 	}
@@ -82,7 +84,6 @@ struct label_table_line* get_label(label_table *labels, char *label_name){
 
 void update_data_labels(label_table labels, int IC){
 	struct label_table_line *curr_lab;
-	printf("labels count: %d, first label value: %d\n", labels.length, labels.table[0].value);
 
 	for(curr_lab = labels.table; curr_lab < labels.table + labels.length; curr_lab++)
 		if((*curr_lab).data) (curr_lab->value) += IC;

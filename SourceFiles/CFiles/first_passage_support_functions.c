@@ -21,12 +21,12 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 		if( !is_str_empty(segment) ) break;
 	}
 	if(is_str_empty(segment)) return NONE; /*empty sentence*/
-	printf("current line is %s\n", line);
+
 	/*scan for a potential label definition at the start of the line*/
 	error_temp = scan_for_label(segment, host, line_num, label_name);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 	if(error_temp != NONE && error_temp != NO_LABEL) return error_temp;
-	printf("label good - %d\n", error_temp);
+
 
 	if(error_temp != NO_LABEL) {
 		/* case a label is defined in this line */
@@ -35,7 +35,7 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 
 		/* scans for the practically first literal word in the line, as the actual first one is a label declaration as was found above. i is not reset to 0 as it is important to continue iterating onwards from the point where the last loop concluded */
 		for(i = get_token(segment, line, ' ', i, line_len); i>=0; i = get_token(segment, line, ' ', i, line_len)) {
-			printf("curr|%s|\n", segment);
+
 			if( !is_str_empty(segment) ) 
 				break;
 		}	
@@ -52,7 +52,6 @@ errorType first_passage_line(char *line, tables_host *host, int *IC, int *DC, co
 	/* check whether or not an instruction call is being made; the sentence can either include an instruction (starting with a dot) or an operation, and there is need to act accordingly for each of these options. */
 	if(segment[0] == '.') sentype = INSTRUCTION;
 	else sentype = OPERATION;
-	printf("segment |%s| **********************************************************\n", segment);
 
 	switch(sentype){
 		case INSTRUCTION:
@@ -96,14 +95,12 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, co
 	char segment[MAXLINE];
 	int i, line_len;
 	errorType error_temp = NONE;
-	printf("line is %s on handle_instruction_passage1 call\n", line);
 
 	line_len = strlen(line); /*again, it is more efficient not to calculate the length of a string over and over again. */
 
 	for(i = get_token(segment, line, ' ', 0, line_len); i>=0; i = get_token(segment, line, ' ', i, line_len)) 
 		/*it is required to start scanning at the instruction name, a section starting with a dot is an insturction. */
 		if(segment[0] == '.') break;
-	printf("the detected instruction is |%s|. also |%s| %d\n", segment, ".data", strcmp(segment, ".data"));
 	
 	if(strcmp(segment, ".data") == 0){
 		/* case for .data instruction*/
@@ -117,7 +114,6 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, co
 	}
 	else if(strcmp(segment, ".extern") == 0){
 		/* case for .extern instruction*/
-		printf("Is this a real knife?\n");
 		error_temp = extern_inst(host, line, linecnt);
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 		else if(error_temp != NONE) return error_temp;
@@ -125,7 +121,7 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, co
 		error_temp = USELESS_LABEL;
 	}
 	else if(strcmp(segment, ".entry") == 0){
-		/* case for .entry instruction*/ printf("tsui ni kita\n");
+		/* case for .entry instruction*/ 
 		error_temp = firstphase_entry_inst(host, line, linecnt);
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 		else if(error_temp != NONE) return error_temp;
@@ -135,8 +131,11 @@ errorType handle_instruction_passage1(int *DC, char *line, tables_host *host, co
 	}
 	else{
 
-		/*if a comma is not seperated from the instruction itself by any spaces, it is considered a part of it, and so an illegal comma error will not be emitted here*/
-		error_temp = add_error(&(host->errors), ILLEGAL_INSTRUCTION_NAME, linecnt);
+		if(does_include_illegal_comma(segment)) /*an illegal comma adjacent to the instruction's name will be considered a more imminent error than the instruction preceeding it not being identifiable.*/
+			error_temp = add_error(&(host->errors), ILLEGAL_COMMA, linecnt);
+		else
+			error_temp = add_error(&(host->errors), ILLEGAL_INSTRUCTION_NAME, linecnt);
+		
 		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 	}
 
@@ -164,13 +163,21 @@ errorType read_code_line(tables_host *host, char *line, int *IC, const int linec
 		if( token[strlen(token)-1] != ':' && !(IS_WHITESPACE(token[0])) && token[0]!='\0' /*it can't be the end of the string either*/ )
 			break; /*if the token does not comprise of whitespaces and does not end with a colon (a label definition), it is the operation.*/
 	}
-	printf("op: |%s|\n", token);
+	
+	/*if a comma appears adjacent to the operation call without any seperating spaces, the error will be more imminent than a potential "operation does not exist error"*/
+	if(does_include_illegal_comma(token)){
+		add_error( &(host->errors), ILLEGAL_COMMA, linecnt);
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
+		return error_temp;
+	}
+
 	/* identifies the operation */
 	op_type = detect_op(token);
 
 	/* is the operation valid? */
 	if(op_type == ILLEGAL){
 		error_temp = add_error( &(host->errors),ILLEGAL_FUNCTION_NAME, linecnt);
+		if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 		return error_temp; /*no need to continue going over the line past the first error*/
 	}
 
@@ -199,11 +206,11 @@ errorType read_code_line(tables_host *host, char *line, int *IC, const int linec
 		error_temp = add_error( &(host->errors), EXTRANEOUS_TEXT, linecnt);
 		return error_temp; /*there is an error, and so there is no real reason to continue reading the line.*/
 	}
-	printf("I learned to read a long, long time ago\n");
+
 	/*analyse the argument list*/
 	if(expected_arg_count > 0) error_temp = read_op_args(&op_word, host, line, expected_arg_count, IC, linecnt, interpret_labels);
 	if(error_temp != NONE) return error_temp;
-	printf("word val: %x\n", startword_to_value(op_word));
+
 	/*sets the value of the startword in the word table to the op_word infered thus far.*/
 	(host->words.table[startword_index].word.value) = startword_to_value(op_word);
 
@@ -260,7 +267,7 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 		/**** ARGUMENT LIST INFERENCE ****/
 
 		remove_spaces(token); /* makes token easier to read */
-		printf("the arg: |%s|\n", token);
+
 		switch(token[0]){ /*with the spaces removed, the first character of the argument can indicate which addressing method it will require*/
 			case '#':
 			/* case the argument is a numeric constant */ 
@@ -297,7 +304,6 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 				break;
 		}
 		
-		printf("legal so far %d\n", (expected_argument_count == 1 && args_count == 0) || (expected_argument_count == 2 && args_count == 1));
 		if((expected_argument_count == 1 && args_count == 0) || (expected_argument_count == 2 && args_count == 1)){ /*in this case, the argument is the destination*/
 			if(!is_address_method_valid(word->opcode, addressing_manner, DESTINATION)){ /*ensures the discovered addressing method is eligable for the operation*/
 				error_temp = add_error(&(host->errors), ILLEGAL_ARGUMENT, linecnt);
@@ -316,7 +322,7 @@ errorType read_op_args(startword *word, tables_host *host, char *arg_list, int e
 				word->origin_register = token[1] - '0'; /*same situation as above*/
 			word->origin_address = addressing_manner;
 		}
-		printf("legal all the way\n");
+
 	}
 
 	return error_temp;

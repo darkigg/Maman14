@@ -27,11 +27,8 @@ void initiate_tables_host(tables_host *host){
 
 /*simply frees all tables using free()*/
 void free_tables_host(tables_host *host){
-	struct label_table_line *ptr;
-	for(ptr = host->labels.table; ptr < host->labels.length + host->labels.table; ptr++) printf("valliue%d\n", ptr->value);
 
 	if(host->errors.valid) free(host->errors.table);
-	printf("gotcha\n");
 	if(host->labels.valid) free(host->labels.table);
 	if(host->words.valid) free(host->words.table);
 	if(host->data_words.valid)free(host->data_words.table);

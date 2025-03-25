@@ -10,11 +10,11 @@ errorType translate_file(FILE *file, tables_host *host, int *ICF, int *DCF){
 	error_temp = first_passage(file, host, ICF, DCF);
 	
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* the most urgent error, with it there is both a practical and a theoretical impossibility of the compilitation process proceeding */
-	printf("\nat last\n");
+
 	/* STAGE 2 */
 	error_temp = second_passage(host);
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
-	printf("translation concluded\n");
+
 	(*ICF) -= 100; /*as the ICF equals the instruction counter minus 100*/
 	
 	return error_temp;
@@ -49,20 +49,20 @@ errorType first_passage(FILE *file, tables_host *host, int *ICF, int *DCF){
 			line_counter++;
 		}
 		else{
-			printf("|%s|\n", line); 
+
 			error_temp = first_passage_line(line, host, ICF, DCF, ++line_counter);
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host); /* an error of not enough memory requires immidiate termination of the program */
 			else if(error_temp == NO_AVAILABLE_ADDRESS) break; /*if there are no more available addresses for words in the imaginary computer, there is no need to go over the rest of the program */
 		}
 	}
-	printf("first passage concluded:\n data tab len: %d\n instruction tab len: %d\n IC: %d\n DC: %d\n error: %d\n", host->data_words.length, host->words.length, *ICF, *DCF, error_temp);
+
 	/* integrate the table of data words into the main table of words; if errors were encountered, it is not necessary */
 	if(error_temp == NONE) {
 		error_temp = append_data_words_table(&(host->words), &(host->data_words), *ICF);
 		update_data_labels(host->labels, *ICF);
 	}
 	if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
-	printf("append function concluded. first value: %d\n", host->words.table[0].word.value);
+
 	return error_temp;
 
 }
@@ -85,9 +85,8 @@ errorType second_passage(tables_host *host){
 			if(error_temp == UNABLE_TO_ALLOCATE_MEMORY) end_prog(host);
 			continue;
 		}
-		printf("you're wrong %d\n", host->lab_args.length);
 		
-		if(host->lab_args.table[i].entry) {printf("yo %d\n", current_label == NULL);
+		if(host->lab_args.table[i].entry) {
 			if(!(current_label->external)){
 				current_label->entry = True;
 			}
@@ -109,15 +108,20 @@ errorType second_passage(tables_host *host){
 			/*the & operator indicates the value assigned is the difference between the address of the label and the address of the startword at the current line. All operations accepting this kind of arguments accept only a single argument, and so the address of the op word is simply the address of the label argument word minus 1.*/
 			word_val = current_label->value - ((host->words.table[host->lab_args.table[i].word_ind]).address - 1); 
 			word_val = create_regular_word( word_val, True, False, False);
-			printf("&label arg value: %.6x\n", word_val);
+
 			((host->words.table[host->lab_args.table[i].word_ind]).word.value) = word_val; /*assign the value calculated above and the ARE values to the necessary word.*/
 		}
 		else{ /*the argument requires the value of the label*/
-			printf("lable usage reportttttttttttttttttttttttttttttttttie |%s| %d\n", current_label->name, current_label->value);
+
 			word_val = current_label->value; /*just use the value of the label for the value of the word*/
 			word_val = create_regular_word( word_val, False, !(current_label->external), current_label->external);
-			printf("label arg value: %.6x\n", word_val);
+
 			((host->words.table[host->lab_args.table[i].word_ind]).word.value) = word_val; /*if the label is external R is disbaled and E is enabled, else it is the other way.*/ /*PROBLEM ON THIS LINE*/
+		}
+
+		if(current_label->external){ /*if the label in the argument is both legal and external, it is necessary to mark it external for the creation of the .ext file. It is also necessary to keep the address of the word in that case.*/
+			host->lab_args.table[i].external = True;
+			host->lab_args.table[i].address = (host->words.table[host->lab_args.table[i].word_ind]).address;
 		}
 	}
 

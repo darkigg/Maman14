@@ -18,7 +18,6 @@ errorType is_label_def_valid( char *label, const tables_host host ){
 
 	macros = host.macros;
 	other_labels = host.labels;
-	printf("label |%s|\n", label);
 
 	/*in order to avoid problems of whitespaces on the edges, the program will remove whitespaces from the edges of the token (either from the beginning until a non-white character is encountered or from the end until the same occurance)*/
 	for(; IS_WHITESPACE(*label); label++);

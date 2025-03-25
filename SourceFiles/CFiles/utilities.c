@@ -119,6 +119,19 @@ boolean is_comma_missing(char* token){
 	return False; /*no case of missing comma was encountered.*/
 }
 
+boolean does_include_illegal_comma(char *command){
+	/*this function operates by finding (if exists) the first instance of a comma in the provided string, and turning it into the end of it whilst returning that a comma was encountered.
+	by doing so, the function practically deletes from the string any unnecessary part appearing after the comma, limiting it to only the operation call and no more.*/
+	
+	for(; (*command) != '\0'; command++)
+		if(*command == ',') {
+			(*command) = '\0';
+			return True;
+		}
+
+	return False;
+}
+
 int get_token(char* token_dest, char* token_src, const char delimeter, const int token_ind, int src_len){
 	char *char_temp;
 
